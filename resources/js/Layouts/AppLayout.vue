@@ -48,9 +48,33 @@ const logout = () => {
 
                             <!-- Navigation Links -->
                             <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                    Dashboard
-                                </NavLink>
+
+                                <!-- Routes pour Manager -->
+                                <template v-if="$page.props.auth.user.role === 'manager'">
+                                    <NavLink :href="route('manager.dashboard')" :active="route().current('manager.dashboard')">
+                                        Dashboard
+                                    </NavLink>
+                                    <NavLink :href="route('manager.tasks')" :active="route().current('manager.tasks')">
+                                        Gestion des Tâches
+                                    </NavLink>
+                                </template>
+
+                                <!-- Routes pour Collaborateur -->
+                                <template v-if="$page.props.auth.user.role === 'collaborateur'">
+                                    <NavLink :href="route('collaborateur.dashboard')" :active="route().current('collaborateur.dashboard')">
+                                        Dashboard
+                                    </NavLink>
+                                    <NavLink :href="route('collaborateur.tasks')" :active="route().current('collaborateur.tasks')">
+                                        Mes Tâches
+                                    </NavLink>
+                                </template>
+
+                                <!-- Routes pour Admin -->
+                                <template v-if="$page.props.auth.user.role === 'administrateur'">
+                                    <NavLink :href="route('admin.dashboard')" :active="route().current('admin.dashboard')">
+                                        Dashboard
+                                    </NavLink>
+                                </template>
                             </div>
                         </div>
 
@@ -191,9 +215,33 @@ const logout = () => {
                 <!-- Responsive Navigation Menu -->
                 <div :class="{'block': showingNavigationDropdown, 'hidden': ! showingNavigationDropdown}" class="sm:hidden">
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                            Dashboard
-                        </ResponsiveNavLink>
+
+                        <!-- Routes pour Manager -->
+                        <template v-if="$page.props.auth.user.role === 'manager'">
+                            <ResponsiveNavLink :href="route('manager.dashboard')" :active="route().current('manager.dashboard')">
+                                Dashboard
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('manager.tasks')" :active="route().current('manager.tasks')">
+                                Gestion des Tâches
+                            </ResponsiveNavLink>
+                        </template>
+
+                        <!-- Routes pour Collaborateur -->
+                        <template v-if="$page.props.auth.user.role === 'collaborateur'">
+                            <ResponsiveNavLink :href="route('collaborateur.dashboard')" :active="route().current('collaborateur.dashboard')">
+                                Dashboard
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('collaborateur.tasks')" :active="route().current('collaborateur.tasks')">
+                                Mes Tâches
+                            </ResponsiveNavLink>
+                        </template>
+
+                        <!-- Routes pour Admin -->
+                        <template v-if="$page.props.auth.user.role === 'admin'">
+                            <ResponsiveNavLink :href="route('admin.dashboard')" :active="route().current('admin.dashboard')">
+                                Dashboard
+                            </ResponsiveNavLink>
+                        </template>
                     </div>
 
                     <!-- Responsive Settings Options -->

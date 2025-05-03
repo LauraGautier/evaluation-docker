@@ -32,15 +32,27 @@ Route::middleware([
 
     // Routes pour manager
     Route::middleware([CheckRole::class.':manager'])->group(function () {
+        // Dashboard du manager
         Route::get('/manager/dashboard', function () {
             return Inertia::render('Manager/Dashboard');
         })->name('manager.dashboard');
+
+        // Tasks du manager
+        Route::get('/manager/tasks', function () {
+            return Inertia::render('Manager/Tasks');
+        })->name('manager.tasks');
     });
 
     // Routes pour collaborateur
     Route::middleware([CheckRole::class.':collaborateur'])->group(function () {
+        // Dashboard du collaborateur
         Route::get('/collaborateur/dashboard', function () {
             return Inertia::render('Collaborateur/Dashboard');
         })->name('collaborateur.dashboard');
+
+        // Tasks du collaborateur
+        Route::get('/collaborateur/tasks', function () {
+            return Inertia::render('Collaborateur/Tasks');
+        })->name('collaborateur.tasks');
     });
 });
