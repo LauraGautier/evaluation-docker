@@ -24,7 +24,7 @@ Route::middleware([
     })->name('dashboard');
 
     // Routes pour administrateur
-    Route::middleware([CheckRole::class.':admin'])->group(function () {
+    Route::middleware([CheckRole::class.':administrateur'])->group(function () {
         Route::get('/admin/dashboard', function () {
             return Inertia::render('Admin/Dashboard');
         })->name('admin.dashboard');
