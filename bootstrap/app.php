@@ -15,10 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            \App\Http\Middleware\RedirectBasedOnRole::class,
         ]);
-
-        //
+        $middleware->alias([
+            'check.role' => \App\Http\Middleware\CheckRole::class,
+        ]);
+        // Autres configurations de middleware si nécessaire
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Configuration des exceptions si nécessaire
     })->create();
