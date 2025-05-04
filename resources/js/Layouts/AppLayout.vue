@@ -7,6 +7,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 
 defineProps({
     title: String,
@@ -76,6 +77,10 @@ const logout = () => {
                                     </NavLink>
                                 </template>
                             </div>
+                        </div>
+
+                        <div class="absolute right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                            <DarkModeToggle />
                         </div>
 
                         <div class="hidden sm:flex sm:items-center sm:ms-6">
