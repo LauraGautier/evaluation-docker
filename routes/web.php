@@ -14,6 +14,10 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/acces-refuse', function () {
+    return Inertia::render('AccessDenied');
+})->name('access.denied');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),

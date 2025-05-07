@@ -13,7 +13,7 @@ class CheckRole
     public function handle(Request $request, Closure $next, string $role)
     {
         if (!$request->user() || $request->user()->role !== $role) {
-            return redirect()->route('dashboard')->with('error', 'Accès non autorisé');
+            return redirect()->route('access.denied')->with('error', 'Accès non autorisé');
         }
 
         return $next($request);
