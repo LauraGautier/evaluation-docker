@@ -61,6 +61,13 @@ const logout = () => {
                                     <NavLink :href="route('tasks.create')" :active="route().current('tasks.create')">
                                         Créer une tâche
                                     </NavLink>
+                                    <!-- Nouvelles routes KPI -->
+                                    <NavLink :href="route('my.kpi')" :active="route().current('my.kpi')">
+                                        Mes KPIs
+                                    </NavLink>
+                                    <NavLink :href="route('manager.team.kpi')" :active="route().current('manager.team.kpi')">
+                                        KPIs d'équipe
+                                    </NavLink>
                                 </template>
 
                                 <!-- Routes pour Collaborateur -->
@@ -70,6 +77,10 @@ const logout = () => {
                                     </NavLink>
                                     <NavLink :href="route('collaborateur.tasks')" :active="route().current('collaborateur.tasks')">
                                         Mes Tâches
+                                    </NavLink>
+                                    <!-- Nouvelle route KPI -->
+                                    <NavLink :href="route('my.kpi')" :active="route().current('my.kpi')">
+                                        Mes KPIs
                                     </NavLink>
                                 </template>
 
@@ -239,6 +250,13 @@ const logout = () => {
                             <ResponsiveNavLink :href="route('tasks.create')" :active="route().current('tasks.create')">
                                 Créer une tâche
                             </ResponsiveNavLink>
+                            <!-- Nouvelles routes KPI -->
+                            <ResponsiveNavLink :href="route('my.kpi')" :active="route().current('my.kpi')">
+                                Mes KPIs
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('manager.team.kpi')" :active="route().current('manager.team.kpi')">
+                                KPIs d'équipe
+                            </ResponsiveNavLink>
                         </template>
 
                         <!-- Routes pour Collaborateur -->
@@ -248,6 +266,10 @@ const logout = () => {
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('collaborateur.tasks')" :active="route().current('collaborateur.tasks')">
                                 Mes Tâches
+                            </ResponsiveNavLink>
+                            <!-- Nouvelle route KPI -->
+                            <ResponsiveNavLink :href="route('my.kpi')" :active="route().current('my.kpi')">
+                                Mes KPIs
                             </ResponsiveNavLink>
                         </template>
 

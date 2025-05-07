@@ -35,6 +35,16 @@ Route::middleware([
     Route::post('/tasks/{task}/start', [TaskController::class, 'startTask'])->name('tasks.start');
     Route::post('/tasks/{task}/complete', [TaskController::class, 'completeTask'])->name('tasks.complete');
 
+    Route::get('/collaborateur/{collaborateur}/kpi', [TaskController::class, 'collaborateurKpi'])
+    ->name('collaborateur.kpi');
+    Route::get('/my-kpi', [TaskController::class, 'collaborateurKpi'])
+    ->name('my.kpi');
+
+    Route::get('/collaborateur/{collaborateur}/kpi/pdf', [TaskController::class, 'exportCollaborateurKpiPdf'])
+    ->name('collaborateur.kpi.pdf');
+    Route::get('/my-kpi/pdf', [TaskController::class, 'exportCollaborateurKpiPdf'])
+    ->name('my.kpi.pdf');
+
     // Routes pour administrateur
     Route::middleware([CheckRole::class.':administrateur'])->group(function () {
         Route::get('/admin/dashboard', function () {
@@ -48,6 +58,12 @@ Route::middleware([
         Route::get('/manager/dashboard', function () {
             return Inertia::render('Manager/Dashboard');
         })->name('manager.dashboard');
+
+        Route::get('/manager/team-kpi', [TaskController::class, 'teamKpi'])
+        ->name('manager.team.kpi');
+
+        Route::get('/manager/team-kpi/pdf', [TaskController::class, 'exportTeamKpiPdf'])
+        ->name('manager.team.kpi.pdf');
 
         // Liste des tâches pour le manager - utilise maintenant le contrôleur
         Route::get('/manager/tasks', [TaskController::class, 'managerTasks'])->name('manager.tasks');

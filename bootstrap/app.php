@@ -20,9 +20,16 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             'check.role' => \App\Http\Middleware\CheckRole::class,
+            'PDF' => Barryvdh\DomPDF\Facade\Pdf::class,
         ]);
-        // Autres configurations de middleware si nécessaire
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Configuration des exceptions si nécessaire
-    })->create();
+    })
+    ->withProviders([
+        App\Providers\AppServiceProvider::class,
+        App\Providers\FortifyServiceProvider::class,
+        App\Providers\JetstreamServiceProvider::class,
+        Barryvdh\DomPDF\ServiceProvider::class,
+    ])
+    ->create();
