@@ -58,6 +58,9 @@ const logout = () => {
                                     <NavLink :href="route('manager.tasks')" :active="route().current('manager.tasks')">
                                         Gestion des Tâches
                                     </NavLink>
+                                    <NavLink :href="route('tasks.create')" :active="route().current('tasks.create')">
+                                        Créer une tâche
+                                    </NavLink>
                                 </template>
 
                                 <!-- Routes pour Collaborateur -->
@@ -233,6 +236,9 @@ const logout = () => {
                             <ResponsiveNavLink :href="route('manager.tasks')" :active="route().current('manager.tasks')">
                                 Gestion des Tâches
                             </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('tasks.create')" :active="route().current('tasks.create')">
+                                Créer une tâche
+                            </ResponsiveNavLink>
                         </template>
 
                         <!-- Routes pour Collaborateur -->
@@ -246,7 +252,7 @@ const logout = () => {
                         </template>
 
                         <!-- Routes pour Admin -->
-                        <template v-if="$page.props.auth.user.role === 'admin'">
+                        <template v-if="$page.props.auth.user.role === 'administrateur'">
                             <ResponsiveNavLink :href="route('admin.dashboard')" :active="route().current('admin.dashboard')">
                                 Dashboard
                             </ResponsiveNavLink>
@@ -295,7 +301,7 @@ const logout = () => {
                                 </div>
 
                                 <!-- Team Settings -->
-                                <ResponsiveNavLink :href="route('teams.show', $page.props.auth.user.current_team)" :active="route().current('teams.show')">
+                                <ResponsiveNavLink v-if="$page.props.auth.user.current_team" :href="route('teams.show', $page.props.auth.user.current_team)" :active="route().current('teams.show')">
                                     Team Settings
                                 </ResponsiveNavLink>
 
