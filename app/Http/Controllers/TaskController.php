@@ -301,42 +301,238 @@ class TaskController extends Controller
         ]);
     }
 
-/**
- * Afficher les KPIs de l'équipe (pour le manager)
- */
-public function teamKpi(Request $request)
-{
-    $user = $request->user();
+    /**
+     * Afficher les KPIs de l'équipe (pour le manager)
+     */
+    public function teamKpi(Request $request)
+    {
+        $user = $request->user();
 
-    // Vérifier que l'utilisateur est bien un manager
-    if ($user->role !== 'manager') {
-        return redirect()->route('access.denied')->with('error', 'Accès non autorisé');
+        // Vérifier que l'utilisateur est bien un manager
+        if ($user->role !== 'manager') {
+            return redirect()->route('access.denied')->with('error', 'Accès non autorisé');
+        }
+
+        $team = $user->currentTeam;
+
+        // Récupérer tous les collaborateurs de l'équipe
+        $collaborateurs = $team->users->filter(function ($teamUser) {
+            return $teamUser->role === 'collaborateur';
+        });
+
+        // Collecter les KPIs par collaborateur
+        $collaborateurKpis = [];
+
+        foreach ($collaborateurs as $collaborateur) {
+            // Tâches totales assignées à ce collaborateur dans cette équipe
+            $totalTasks = Task::where('team_id', $team->id)
+                ->where('assigned_to', $collaborateur->id)
+                ->count();
+
+            // Tâches terminées
+            $completedTasks = Task::where('team_id', $team->id)
+                ->where('assigned_to', $collaborateur->id)
+                ->where('status', 'completed')
+                ->count();
+
+            // Calcul du temps moyen par tâche terminée
+            $completedTasksData = Task::where('team_id', $team->id)
+                ->where('assigned_to', $collaborateur->id)
+                ->where('status', 'completed')
+                ->whereNotNull('start_time')
+                ->whereNotNull('end_time')
+                ->get();
+
+            $totalTimeMinutes = 0;
+            foreach ($completedTasksData as $task) {
+                $totalTimeMinutes += $task->getDurationAttribute();
+            }
+
+            $averageTimePerTask = $completedTasks > 0 ? $totalTimeMinutes / $completedTasks : 0;
+
+            // Ajouter aux résultats
+            $collaborateurKpis[] = [
+                'collaborateur' => $collaborateur->only('id', 'name', 'email'),
+                'totalTasks' => $totalTasks,
+                'completedTasks' => $completedTasks,
+                'completionRate' => $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0,
+                'averageTimeMinutes' => round($averageTimePerTask, 0),
+            ];
+        }
+
+        // Trier par taux de complétion (du plus haut au plus bas)
+        usort($collaborateurKpis, function ($a, $b) {
+            return $b['completionRate'] <=> $a['completionRate'];
+        });
+
+        // Récupérer les statistiques globales de l'équipe pour les tâches
+        $teamTotalTasks = Task::where('team_id', $team->id)->count();
+        $teamCompletedTasks = Task::where('team_id', $team->id)->where('status', 'completed')->count();
+        $teamPendingTasks = Task::where('team_id', $team->id)->where('status', 'pending')->count();
+        $teamInProgressTasks = Task::where('team_id', $team->id)->where('status', 'in_progress')->count();
+
+        // Récupérer les dernières tâches terminées (toute l'équipe)
+        $recentCompletedTasks = Task::where('team_id', $team->id)
+            ->where('status', 'completed')
+            ->with(['assignedTo:id,name,email'])
+            ->orderBy('end_time', 'desc')
+            ->take(10)
+            ->get();
+
+        // Statistiques par semaine pour les tâches
+        $weeklyStats = Task::where('team_id', $team->id)
+            ->where('status', 'completed')
+            ->whereNotNull('end_time')
+            ->selectRaw('YEARWEEK(end_time) as week, COUNT(*) as count')
+            ->groupBy('week')
+            ->orderBy('week', 'desc')
+            ->take(10)
+            ->get()
+            ->reverse();
+
+        // Récupérer tous les projets de l'équipe
+        $projects = Project::where('team_id', $team->id)
+            ->with(['objectives.creator'])
+            ->get();
+
+        // Calculer les statistiques globales pour les objectifs
+        $teamTotalObjectives = 0;
+        $teamCompletedObjectives = 0;
+
+        foreach ($projects as $project) {
+            $teamTotalObjectives += $project->objectives->count();
+            $teamCompletedObjectives += $project->objectives->where('is_completed', true)->count();
+        }
+
+        $objectivesCompletionRate = $teamTotalObjectives > 0
+            ? round(($teamCompletedObjectives / $teamTotalObjectives) * 100, 1)
+            : 0;
+
+        // Calculer la moyenne d'objectifs par projet
+        $objectivesPerProject = $projects->count() > 0
+            ? round($teamTotalObjectives / $projects->count(), 1)
+            : 0;
+
+        // Statistiques d'objectifs par projet
+        $projectsObjectivesStats = $projects->map(function ($project) {
+            $totalObjectives = $project->objectives->count();
+            $completedObjectives = $project->objectives->where('is_completed', true)->count();
+
+            return [
+                'id' => $project->id,
+                'name' => $project->name,
+                'totalObjectives' => $totalObjectives,
+                'completedObjectives' => $completedObjectives,
+                'completionRate' => $totalObjectives > 0
+                    ? round(($completedObjectives / $totalObjectives) * 100)
+                    : 0
+            ];
+        })->sortByDesc('completionRate')->values()->all();
+
+        // Récupérer les objectifs récemment complétés
+        $recentCompletedObjectives = Objective::whereIn('project_id', $projects->pluck('id'))
+            ->where('is_completed', true)
+            ->with(['project:id,name', 'creator:id,name'])
+            ->orderBy('completed_at', 'desc')
+            ->take(10)
+            ->get();
+
+        // Statistiques hebdomadaires des objectifs complétés
+        $weeklyObjectivesStats = DB::table('objectives')
+            ->selectRaw('YEARWEEK(completed_at) as week, COUNT(*) as count')
+            ->whereIn('project_id', $projects->pluck('id'))
+            ->where('is_completed', true)
+            ->whereNotNull('completed_at')
+            ->groupBy('week')
+            ->orderBy('week', 'desc')
+            ->take(10)
+            ->get()
+            ->reverse();
+
+        return Inertia::render('Manager/TeamKpi', [
+            'team' => $team->only('id', 'name'),
+            'collaborateurKpis' => $collaborateurKpis,
+            'teamKpiData' => [
+                // Données pour les tâches
+                'totalTasks' => $teamTotalTasks,
+                'completedTasks' => $teamCompletedTasks,
+                'pendingTasks' => $teamPendingTasks,
+                'inProgressTasks' => $teamInProgressTasks,
+                'completionRate' => $teamTotalTasks > 0 ? round(($teamCompletedTasks / $teamTotalTasks) * 100, 1) : 0,
+                'recentCompletedTasks' => $recentCompletedTasks,
+                'weeklyStats' => $weeklyStats,
+
+                // Données pour les objectifs
+                'totalObjectives' => $teamTotalObjectives,
+                'completedObjectives' => $teamCompletedObjectives,
+                'objectivesCompletionRate' => $objectivesCompletionRate,
+                'objectivesPerProject' => $objectivesPerProject,
+                'projectsObjectivesStats' => $projectsObjectivesStats,
+                'recentCompletedObjectives' => $recentCompletedObjectives,
+                'weeklyObjectivesStats' => $weeklyObjectivesStats,
+            ],
+        ]);
     }
 
-    $team = $user->currentTeam;
+    /**
+     * Exporter les KPIs d'un collaborateur au format PDF
+     */
+    public function exportCollaborateurKpiPdf(Request $request, User $collaborateur = null)
+    {
+        $user = $request->user();
 
-    // Récupérer tous les collaborateurs de l'équipe
-    $collaborateurs = $team->users->filter(function ($teamUser) {
-        return $teamUser->role === 'collaborateur';
-    });
+        // Si aucun collaborateur n'est spécifié, utilise l'utilisateur connecté
+        if (!$collaborateur) {
+            $collaborateur = $user;
+        }
 
-    // Collecter les KPIs par collaborateur
-    $collaborateurKpis = [];
+        // Vérifie les autorisations - un utilisateur peut voir ses propres KPIs,
+        // un manager peut voir les KPIs des collaborateurs de son équipe
+        if ($user->id !== $collaborateur->id && $user->role !== 'manager') {
+            return redirect()->route('access.denied')->with('error', 'Accès non autorisé');
+        }
 
-    foreach ($collaborateurs as $collaborateur) {
-        // Tâches totales assignées à ce collaborateur dans cette équipe
-        $totalTasks = Task::where('team_id', $team->id)
+        // Si c'est un manager qui veut voir les KPIs d'un collaborateur,
+        // vérifie si ce collaborateur est dans une de ses équipes
+        if ($user->role === 'manager' && $user->id !== $collaborateur->id) {
+            $isInTeam = false;
+            foreach ($user->allTeams() as $team) {
+                if ($team->hasUser($collaborateur)) {
+                    $isInTeam = true;
+                    break;
+                }
+            }
+
+            if (!$isInTeam) {
+                return redirect()->route('access.denied')->with('error', 'Ce collaborateur n\'est pas dans une de vos équipes');
+            }
+        }
+
+        // Récupère toutes les équipes du collaborateur
+        $teamIds = $collaborateur->allTeams()->pluck('id')->toArray();
+
+        // Calcule les KPIs
+        $totalTasks = Task::whereIn('team_id', $teamIds)
             ->where('assigned_to', $collaborateur->id)
             ->count();
 
-        // Tâches terminées
-        $completedTasks = Task::where('team_id', $team->id)
+        $completedTasks = Task::whereIn('team_id', $teamIds)
             ->where('assigned_to', $collaborateur->id)
             ->where('status', 'completed')
             ->count();
 
+        $inProgressTasks = Task::whereIn('team_id', $teamIds)
+            ->where('assigned_to', $collaborateur->id)
+            ->where('status', 'in_progress')
+            ->count();
+
+        $pendingTasks = Task::whereIn('team_id', $teamIds)
+            ->where('assigned_to', $collaborateur->id)
+            ->where('status', 'pending')
+            ->count();
+
         // Calcul du temps moyen par tâche terminée
-        $completedTasksData = Task::where('team_id', $team->id)
+        $completedTasksData = Task::whereIn('team_id', $teamIds)
             ->where('assigned_to', $collaborateur->id)
             ->where('status', 'completed')
             ->whereNotNull('start_time')
@@ -350,249 +546,53 @@ public function teamKpi(Request $request)
 
         $averageTimePerTask = $completedTasks > 0 ? $totalTimeMinutes / $completedTasks : 0;
 
-        // Ajouter aux résultats
-        $collaborateurKpis[] = [
-            'collaborateur' => $collaborateur->only('id', 'name', 'email'),
-            'totalTasks' => $totalTasks,
-            'completedTasks' => $completedTasks,
-            'completionRate' => $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0,
-            'averageTimeMinutes' => round($averageTimePerTask, 0),
+        // Récupère les 10 dernières tâches terminées
+        $recentCompletedTasks = Task::whereIn('team_id', $teamIds)
+            ->where('assigned_to', $collaborateur->id)
+            ->where('status', 'completed')
+            ->with('team:id,name')
+            ->orderBy('end_time', 'desc')
+            ->take(10)
+            ->get();
+
+        // Préparer les données pour le PDF
+        $data = [
+            'collaborateur' => $collaborateur,
+            'kpiData' => [
+                'totalTasks' => $totalTasks,
+                'completedTasks' => $completedTasks,
+                'inProgressTasks' => $inProgressTasks,
+                'pendingTasks' => $pendingTasks,
+                'completionRate' => $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0,
+                'averageTimeMinutes' => round($averageTimePerTask, 0),
+                'recentCompletedTasks' => $recentCompletedTasks,
+            ],
+            'dateGeneration' => now()->format('d/m/Y H:i'),
         ];
-    }
 
-    // Trier par taux de complétion (du plus haut au plus bas)
-    usort($collaborateurKpis, function ($a, $b) {
-        return $b['completionRate'] <=> $a['completionRate'];
-    });
+        // Générer le PDF
+        $pdf = app('dompdf.wrapper');
+        $pdf->loadView('pdf.collaborateur-kpi', $data);
+        $pdf->setPaper('a4', 'portrait');
 
-    // Récupérer les statistiques globales de l'équipe pour les tâches
-    $teamTotalTasks = Task::where('team_id', $team->id)->count();
-    $teamCompletedTasks = Task::where('team_id', $team->id)->where('status', 'completed')->count();
-    $teamPendingTasks = Task::where('team_id', $team->id)->where('status', 'pending')->count();
-    $teamInProgressTasks = Task::where('team_id', $team->id)->where('status', 'in_progress')->count();
+        // Nom du fichier
+        $filename = 'kpi-' . $collaborateur->name . '-' . now()->format('Y-m-d') . '.pdf';
 
-    // Récupérer les dernières tâches terminées (toute l'équipe)
-    $recentCompletedTasks = Task::where('team_id', $team->id)
-        ->where('status', 'completed')
-        ->with(['assignedTo:id,name,email'])
-        ->orderBy('end_time', 'desc')
-        ->take(10)
-        ->get();
+        // Enregistrer temporairement le fichier
+        $tempPath = storage_path('app/public/temp/' . $filename);
 
-    // Statistiques par semaine pour les tâches
-    $weeklyStats = Task::where('team_id', $team->id)
-        ->where('status', 'completed')
-        ->whereNotNull('end_time')
-        ->selectRaw('YEARWEEK(end_time) as week, COUNT(*) as count')
-        ->groupBy('week')
-        ->orderBy('week', 'desc')
-        ->take(10)
-        ->get()
-        ->reverse();
-
-    // Récupérer tous les projets de l'équipe
-    $projects = Project::where('team_id', $team->id)
-        ->with(['objectives.creator'])
-        ->get();
-
-    // Calculer les statistiques globales pour les objectifs
-    $teamTotalObjectives = 0;
-    $teamCompletedObjectives = 0;
-
-    foreach ($projects as $project) {
-        $teamTotalObjectives += $project->objectives->count();
-        $teamCompletedObjectives += $project->objectives->where('is_completed', true)->count();
-    }
-
-    $objectivesCompletionRate = $teamTotalObjectives > 0
-        ? round(($teamCompletedObjectives / $teamTotalObjectives) * 100, 1)
-        : 0;
-
-    // Calculer la moyenne d'objectifs par projet
-    $objectivesPerProject = $projects->count() > 0
-        ? round($teamTotalObjectives / $projects->count(), 1)
-        : 0;
-
-    // Statistiques d'objectifs par projet
-    $projectsObjectivesStats = $projects->map(function ($project) {
-        $totalObjectives = $project->objectives->count();
-        $completedObjectives = $project->objectives->where('is_completed', true)->count();
-
-        return [
-            'id' => $project->id,
-            'name' => $project->name,
-            'totalObjectives' => $totalObjectives,
-            'completedObjectives' => $completedObjectives,
-            'completionRate' => $totalObjectives > 0
-                ? round(($completedObjectives / $totalObjectives) * 100)
-                : 0
-        ];
-    })->sortByDesc('completionRate')->values()->all();
-
-    // Récupérer les objectifs récemment complétés
-    $recentCompletedObjectives = Objective::whereIn('project_id', $projects->pluck('id'))
-        ->where('is_completed', true)
-        ->with(['project:id,name', 'creator:id,name'])
-        ->orderBy('completed_at', 'desc')
-        ->take(10)
-        ->get();
-
-    // Statistiques hebdomadaires des objectifs complétés
-    $weeklyObjectivesStats = DB::table('objectives')
-        ->selectRaw('YEARWEEK(completed_at) as week, COUNT(*) as count')
-        ->whereIn('project_id', $projects->pluck('id'))
-        ->where('is_completed', true)
-        ->whereNotNull('completed_at')
-        ->groupBy('week')
-        ->orderBy('week', 'desc')
-        ->take(10)
-        ->get()
-        ->reverse();
-
-    return Inertia::render('Manager/TeamKpi', [
-        'team' => $team->only('id', 'name'),
-        'collaborateurKpis' => $collaborateurKpis,
-        'teamKpiData' => [
-            // Données pour les tâches
-            'totalTasks' => $teamTotalTasks,
-            'completedTasks' => $teamCompletedTasks,
-            'pendingTasks' => $teamPendingTasks,
-            'inProgressTasks' => $teamInProgressTasks,
-            'completionRate' => $teamTotalTasks > 0 ? round(($teamCompletedTasks / $teamTotalTasks) * 100, 1) : 0,
-            'recentCompletedTasks' => $recentCompletedTasks,
-            'weeklyStats' => $weeklyStats,
-
-            // Données pour les objectifs
-            'totalObjectives' => $teamTotalObjectives,
-            'completedObjectives' => $teamCompletedObjectives,
-            'objectivesCompletionRate' => $objectivesCompletionRate,
-            'objectivesPerProject' => $objectivesPerProject,
-            'projectsObjectivesStats' => $projectsObjectivesStats,
-            'recentCompletedObjectives' => $recentCompletedObjectives,
-            'weeklyObjectivesStats' => $weeklyObjectivesStats,
-        ],
-    ]);
-}
-
-/**
- * Exporter les KPIs d'un collaborateur au format PDF
- */
-public function exportCollaborateurKpiPdf(Request $request, User $collaborateur = null)
-{
-    $user = $request->user();
-
-    // Si aucun collaborateur n'est spécifié, utilise l'utilisateur connecté
-    if (!$collaborateur) {
-        $collaborateur = $user;
-    }
-
-    // Vérifie les autorisations - un utilisateur peut voir ses propres KPIs,
-    // un manager peut voir les KPIs des collaborateurs de son équipe
-    if ($user->id !== $collaborateur->id && $user->role !== 'manager') {
-        return redirect()->route('access.denied')->with('error', 'Accès non autorisé');
-    }
-
-    // Si c'est un manager qui veut voir les KPIs d'un collaborateur,
-    // vérifie si ce collaborateur est dans une de ses équipes
-    if ($user->role === 'manager' && $user->id !== $collaborateur->id) {
-        $isInTeam = false;
-        foreach ($user->allTeams() as $team) {
-            if ($team->hasUser($collaborateur)) {
-                $isInTeam = true;
-                break;
-            }
+        // Créer le répertoire s'il n'existe pas
+        if (!file_exists(storage_path('app/public/temp'))) {
+            mkdir(storage_path('app/public/temp'), 0775, true);
         }
 
-        if (!$isInTeam) {
-            return redirect()->route('access.denied')->with('error', 'Ce collaborateur n\'est pas dans une de vos équipes');
-        }
+        file_put_contents($tempPath, $pdf->output());
+
+        // Servir le fichier comme un téléchargement
+        return response()->download($tempPath, $filename, [
+            'Content-Type' => 'application/pdf',
+        ])->deleteFileAfterSend(true);
     }
-
-    // Récupère toutes les équipes du collaborateur
-    $teamIds = $collaborateur->allTeams()->pluck('id')->toArray();
-
-    // Calcule les KPIs
-    $totalTasks = Task::whereIn('team_id', $teamIds)
-        ->where('assigned_to', $collaborateur->id)
-        ->count();
-
-    $completedTasks = Task::whereIn('team_id', $teamIds)
-        ->where('assigned_to', $collaborateur->id)
-        ->where('status', 'completed')
-        ->count();
-
-    $inProgressTasks = Task::whereIn('team_id', $teamIds)
-        ->where('assigned_to', $collaborateur->id)
-        ->where('status', 'in_progress')
-        ->count();
-
-    $pendingTasks = Task::whereIn('team_id', $teamIds)
-        ->where('assigned_to', $collaborateur->id)
-        ->where('status', 'pending')
-        ->count();
-
-    // Calcul du temps moyen par tâche terminée
-    $completedTasksData = Task::whereIn('team_id', $teamIds)
-        ->where('assigned_to', $collaborateur->id)
-        ->where('status', 'completed')
-        ->whereNotNull('start_time')
-        ->whereNotNull('end_time')
-        ->get();
-
-    $totalTimeMinutes = 0;
-    foreach ($completedTasksData as $task) {
-        $totalTimeMinutes += $task->getDurationAttribute();
-    }
-
-    $averageTimePerTask = $completedTasks > 0 ? $totalTimeMinutes / $completedTasks : 0;
-
-    // Récupère les 10 dernières tâches terminées
-    $recentCompletedTasks = Task::whereIn('team_id', $teamIds)
-        ->where('assigned_to', $collaborateur->id)
-        ->where('status', 'completed')
-        ->with('team:id,name')
-        ->orderBy('end_time', 'desc')
-        ->take(10)
-        ->get();
-
-    // Préparer les données pour le PDF
-    $data = [
-        'collaborateur' => $collaborateur,
-        'kpiData' => [
-            'totalTasks' => $totalTasks,
-            'completedTasks' => $completedTasks,
-            'inProgressTasks' => $inProgressTasks,
-            'pendingTasks' => $pendingTasks,
-            'completionRate' => $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0,
-            'averageTimeMinutes' => round($averageTimePerTask, 0),
-            'recentCompletedTasks' => $recentCompletedTasks,
-        ],
-        'dateGeneration' => now()->format('d/m/Y H:i'),
-    ];
-
-    // Générer le PDF
-    $pdf = app('dompdf.wrapper');
-    $pdf->loadView('pdf.collaborateur-kpi', $data);
-    $pdf->setPaper('a4', 'portrait');
-
-    // Nom du fichier
-    $filename = 'kpi-' . $collaborateur->name . '-' . now()->format('Y-m-d') . '.pdf';
-
-    // Enregistrer temporairement le fichier
-    $tempPath = storage_path('app/public/temp/' . $filename);
-
-    // Créer le répertoire s'il n'existe pas
-    if (!file_exists(storage_path('app/public/temp'))) {
-        mkdir(storage_path('app/public/temp'), 0775, true);
-    }
-
-    file_put_contents($tempPath, $pdf->output());
-
-    // Servir le fichier comme un téléchargement
-    return response()->download($tempPath, $filename, [
-        'Content-Type' => 'application/pdf',
-    ])->deleteFileAfterSend(true);
-}
 
 /**
  * Exporter les KPIs de l'équipe au format PDF
