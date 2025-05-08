@@ -53,18 +53,15 @@ const logout = () => {
                                 <!-- Routes pour Manager -->
                                 <template v-if="$page.props.auth.user.role === 'manager'">
                                     <NavLink :href="route('manager.dashboard')" :active="route().current('manager.dashboard')">
-                                        Dashboard
+                                        Tableau de Bord
+                                    </NavLink>
+                                    <NavLink :href="route('projects.index')" :active="route().current('projects.*')">
+                                        Gestion des Projets
                                     </NavLink>
                                     <NavLink :href="route('manager.tasks')" :active="route().current('manager.tasks')">
                                         Gestion des Tâches
                                     </NavLink>
-                                    <NavLink :href="route('tasks.create')" :active="route().current('tasks.create')">
-                                        Créer une tâche
-                                    </NavLink>
                                     <!-- Nouvelles routes KPI -->
-                                    <NavLink :href="route('my.kpi')" :active="route().current('my.kpi')">
-                                        Mes KPIs
-                                    </NavLink>
                                     <NavLink :href="route('manager.team.kpi')" :active="route().current('manager.team.kpi')">
                                         KPIs d'équipe
                                     </NavLink>

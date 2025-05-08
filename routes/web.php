@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -35,6 +36,9 @@ Route::middleware([
     Route::post('/tasks/{task}/start', [TaskController::class, 'startTask'])->name('tasks.start');
     Route::post('/tasks/{task}/complete', [TaskController::class, 'completeTask'])->name('tasks.complete');
 
+    Route::resource('projects', ProjectController::class)
+    ->only(['index', 'show', 'edit', 'create']);
+
     Route::get('/collaborateur/{collaborateur}/kpi', [TaskController::class, 'collaborateurKpi'])
     ->name('collaborateur.kpi');
     Route::get('/my-kpi', [TaskController::class, 'collaborateurKpi'])
@@ -64,6 +68,9 @@ Route::middleware([
 
         Route::get('/manager/team-kpi/pdf', [TaskController::class, 'exportTeamKpiPdf'])
         ->name('manager.team.kpi.pdf');
+
+        Route::resource('projects', ProjectController::class)
+        ->except(['index', 'show']);
 
         // Liste des tâches pour le manager - utilise maintenant le contrôleur
         Route::get('/manager/tasks', [TaskController::class, 'managerTasks'])->name('manager.tasks');

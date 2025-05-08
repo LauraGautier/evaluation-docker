@@ -14,6 +14,7 @@ class Task extends Model
         'title',
         'description',
         'team_id',
+        'project_id',
         'assigned_to',
         'status',
         'start_time',
@@ -59,5 +60,10 @@ class Task extends Model
     public function isCompleted()
     {
         return $this->status === 'completed';
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 }

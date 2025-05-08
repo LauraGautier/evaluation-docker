@@ -11,7 +11,7 @@
           <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
             <div class="mb-6">
               <Link
-                :href="$page.props.user.role === 'manager' ? route('manager.tasks') : route('collaborateur.tasks')"
+                :href="$page.props.auth.user.role === 'manager' ? route('manager.tasks') : route('collaborateur.tasks')"
                 class="text-blue-600 dark:text-blue-400 hover:underline"
               >
                 &larr; Retour à la liste
@@ -66,7 +66,7 @@
               </div>
             </div>
 
-            <div class="flex space-x-4" v-if="$page.props.user.id === task.assigned_to.id">
+            <div class="flex space-x-4" v-if="$page.props.user && task.assigned_to && $page.props.user.id === task.assigned_to.id">
               <Link
                 v-if="task.status === 'pending'"
                 :href="route('tasks.start', task.id)"

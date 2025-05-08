@@ -22,6 +22,27 @@
                 <div v-if="form.errors.title" class="text-red-500 dark:text-red-400 mt-1 text-sm">{{ form.errors.title }}</div>
               </div>
 
+              <!-- Ajouter le champ pour sélectionner le projet -->
+              <div class="mb-4">
+                <label for="project_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Projet</label>
+                <select
+                  id="project_id"
+                  v-model="form.project_id"
+                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  required
+                >
+                  <option value="" disabled>Sélectionner un projet</option>
+                  <option
+                    v-for="project in projects"
+                    :key="project.id"
+                    :value="project.id"
+                  >
+                    {{ project.name }}
+                  </option>
+                </select>
+                <div v-if="form.errors.project_id" class="text-red-500 dark:text-red-400 mt-1 text-sm">{{ form.errors.project_id }}</div>
+              </div>
+
               <div class="mb-4">
                 <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                 <textarea
@@ -89,13 +110,17 @@
     props: {
       team: Object,
       teamMembers: Array,
+      projects: Array, // Ajoutez cette prop pour recevoir la liste des projets
+      selectedProjectId: [String, Number], // Pour pré-sélectionner un projet (optionnel)
     },
 
-    setup() {
+    setup(props) {
       const form = useForm({
         title: '',
         description: '',
         assigned_to: '',
+        project_id: props.selectedProjectId || '', // Initialiser avec le projet sélectionné s'il existe
+        return_to_project: !!props.selectedProjectId, // Option pour rediriger vers le projet après création
       });
 
       return { form };

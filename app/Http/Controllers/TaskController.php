@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\Team;
 use App\Models\User;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -69,9 +70,15 @@ class TaskController extends Controller
                 ];
             });
 
+        // Récupérer les projets de l'équipe
+        $projects = Project::where('team_id', $team->id)
+            ->where('status', 'active')
+            ->get(['id', 'name']);
+
         return Inertia::render('Manager/TaskCreate', [
             'team' => $team,
             'teamMembers' => $teamMembers,
+            'projects' => $projects,
         ]);
     }
 
@@ -90,12 +97,20 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'assigned_to' => 'required|exists:users,id',
+            'project_id' => 'required|exists:projects,id',
         ]);
+
+        // Vérifier que le projet appartient bien à l'équipe
+        $project = Project::findOrFail($validated['project_id']);
+        if ($project->team_id !== $team->id) {
+            return redirect()->back()->with('error', 'Le projet sélectionné n\'appartient pas à votre équipe.');
+        }
 
         $task = Task::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
             'team_id' => $team->id,
+            'project_id' => $validated['project_id'],
             'assigned_to' => $validated['assigned_to'],
             'created_by' => $user->id,
             'status' => 'pending',
