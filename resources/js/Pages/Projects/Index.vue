@@ -252,18 +252,26 @@
         return Math.round((stats.completed / stats.total) * 100);
       },
       getObjectivesStats(project) {
-        // On suppose que chaque projet contient un tableau d'objectifs
-        const objectives = project.objectives || [];
-        return {
-          total: objectives.length,
-          completed: objectives.filter(objective => objective.is_completed).length
-        };
-      },
-      getObjectivesCompletionPercentage(project) {
+  // Vérifier si le projet a des objectifs
+  if (!project.objectives || !Array.isArray(project.objectives)) {
+    return { total: 0, completed: 0 };
+  }
+
+  return {
+    total: project.objectives.length,
+    completed: project.objectives.filter(objective => objective.is_completed).length
+  };
+},
+
+        getObjectivesCompletionPercentage(project) {
         const stats = this.getObjectivesStats(project);
-        if (stats.total === 0) return 0;
+
+        if (stats.total === 0) {
+            return 0;
+        }
+
         return Math.round((stats.completed / stats.total) * 100);
-      },
+        },
       resetFilters() {
         this.filters = {
           status: '',

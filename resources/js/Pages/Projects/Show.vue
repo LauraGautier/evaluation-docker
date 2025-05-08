@@ -92,127 +92,127 @@
             </div>
           </div>
 
-          <!-- Section Objectifs -->
-          <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-6">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-lg font-bold">Objectifs du projet</h3>
-              <div v-if="canEdit">
-                <button @click="showObjectiveForm = true" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition">
-                  Ajouter un objectif
-                </button>
-              </div>
-            </div>
+<!-- Section Objectifs -->
+<div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-6">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-bold">Objectifs du projet</h3>
+    <div v-if="canEdit">
+      <button @click="showObjectiveForm = true" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition">
+        Ajouter un objectif
+      </button>
+    </div>
+  </div>
 
-            <!-- Formulaire d'ajout d'objectif -->
-            <div v-if="showObjectiveForm && canEdit" class="mb-6 p-4 bg-gray-50 rounded-lg">
-              <form @submit.prevent="submitObjective">
-                <div class="mb-3">
-                  <label for="title" class="block text-sm font-medium text-gray-700">Titre</label>
-                  <input
-                    type="text"
-                    id="title"
-                    v-model="objectiveForm.title"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    required
-                  >
-                </div>
+  <!-- Formulaire d'ajout d'objectif -->
+  <div v-if="showObjectiveForm && canEdit" class="mb-6 p-4 bg-gray-50 rounded-lg">
+    <form @submit.prevent="submitObjective">
+      <div class="mb-3">
+        <label for="title" class="block text-sm font-medium text-gray-700">Titre</label>
+        <input
+          type="text"
+          id="title"
+          v-model="objectiveForm.title"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          required
+        >
+      </div>
 
-                <div class="mb-3">
-                  <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                  <textarea
-                    id="description"
-                    v-model="objectiveForm.description"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    rows="3"
-                  ></textarea>
-                </div>
+      <div class="mb-3">
+        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+        <textarea
+          id="description"
+          v-model="objectiveForm.description"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          rows="3"
+        ></textarea>
+      </div>
 
-                <div class="mb-3">
-                  <label for="due_date" class="block text-sm font-medium text-gray-700">Date d'échéance</label>
-                  <input
-                    type="date"
-                    id="due_date"
-                    v-model="objectiveForm.due_date"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  >
-                </div>
+      <div class="mb-3">
+        <label for="due_date" class="block text-sm font-medium text-gray-700">Date d'échéance</label>
+        <input
+          type="date"
+          id="due_date"
+          v-model="objectiveForm.due_date"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        >
+      </div>
 
-                <div class="flex justify-end">
-                  <button
-                    type="button"
-                    @click="showObjectiveForm = false"
-                    class="mr-2 inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:ring focus:ring-blue-200 active:text-gray-800 active:bg-gray-50 transition"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    type="submit"
-                    class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 transition"
-                    :disabled="objectiveProcessing"
-                  >
-                    Enregistrer
-                  </button>
-                </div>
-              </form>
-            </div>
+      <div class="flex justify-end">
+        <button
+          type="button"
+          @click="showObjectiveForm = false"
+          class="mr-2 inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:ring focus:ring-blue-200 active:text-gray-800 active:bg-gray-50 transition"
+        >
+          Annuler
+        </button>
+        <button
+          type="submit"
+          class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 transition"
+          :disabled="objectiveProcessing"
+        >
+          Enregistrer
+        </button>
+      </div>
+    </form>
+  </div>
 
-            <!-- Liste des objectifs -->
-            <div v-if="objectives.length" class="space-y-4">
-              <div
-                v-for="objective in objectives"
-                :key="objective.id"
-                class="border p-4 rounded hover:bg-gray-50"
-                :class="{ 'border-green-400 bg-green-50': objective.is_completed }"
-              >
-                <div class="flex items-start justify-between">
-                  <div>
-                    <h4 class="font-semibold" :class="{ 'line-through': objective.is_completed }">
-                      {{ objective.title }}
-                    </h4>
-                    <p v-if="objective.description" class="text-gray-600 mt-1">
-                      {{ objective.description }}
-                    </p>
-                    <div class="mt-2 text-sm">
-                      <span v-if="objective.due_date" class="text-gray-500">
-                        Échéance: {{ formatDate(objective.due_date) }}
-                      </span>
-                      <span v-if="objective.is_completed" class="ml-4 text-green-600">
-                        Complété le {{ formatDate(objective.completed_at) }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div v-if="canEdit" class="flex items-center">
-                    <button
-                      @click="toggleObjectiveCompletion(objective)"
-                      class="ml-2 p-1 rounded"
-                      :class="{ 'bg-green-100': !objective.is_completed, 'bg-gray-100': objective.is_completed }"
-                    >
-                      <svg v-if="objective.is_completed" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                      </svg>
-                      <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </button>
-                    <button
-                      @click="deleteObjective(objective)"
-                      class="ml-2 p-1 rounded bg-red-100 text-red-500"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Message si aucun objectif -->
-            <div v-else class="text-center py-8">
-              <p class="text-gray-500">Aucun objectif défini pour ce projet</p>
-            </div>
+  <!-- Liste des objectifs -->
+  <div v-if="objectives.length" class="space-y-4">
+    <div
+      v-for="objective in objectives"
+      :key="objective.id"
+      class="border p-4 rounded hover:bg-gray-50"
+      :class="{ 'border-green-400 bg-green-50': objective.is_completed }"
+    >
+      <div class="flex items-start justify-between">
+        <div>
+          <h4 class="font-semibold" :class="{ 'line-through': objective.is_completed }">
+            {{ objective.title }}
+          </h4>
+          <p v-if="objective.description" class="text-gray-600 mt-1">
+            {{ objective.description }}
+          </p>
+          <div class="mt-2 text-sm">
+            <span v-if="objective.due_date" class="text-gray-500">
+              Échéance: {{ formatDate(objective.due_date) }}
+            </span>
+            <span v-if="objective.is_completed" class="ml-4 text-green-600">
+              Complété le {{ formatDate(objective.completed_at) }}
+            </span>
           </div>
+        </div>
+
+        <div v-if="canEdit" class="flex items-center">
+          <button
+            @click="toggleObjectiveCompletion(objective)"
+            class="ml-2 p-1 rounded"
+            :class="{ 'bg-green-100': !objective.is_completed, 'bg-gray-100': objective.is_completed }"
+          >
+            <svg v-if="objective.is_completed" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+          <button
+            @click="deleteObjective(objective)"
+            class="ml-2 p-1 rounded bg-red-100 text-red-500"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message si aucun objectif -->
+  <div v-else class="text-center py-8">
+    <p class="text-gray-500">Aucun objectif défini pour ce projet</p>
+  </div>
+</div>
 
           <!-- Liste des tâches -->
           <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">

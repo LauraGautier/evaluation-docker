@@ -11,6 +11,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Task::class => TaskPolicy::class,
         Project::class => ProjectPolicy::class,
+        Objective::class => ObjectivePolicy::class,
     ];
 
     public function boot(): void

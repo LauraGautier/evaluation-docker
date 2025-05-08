@@ -42,6 +42,25 @@ class Project extends Model
         return $this->hasMany(Task::class);
     }
 
+    public function objectives(): HasMany
+    {
+        return $this->hasMany(Objective::class);
+    }
+
+    // Ajoutez la méthode pour calculer le pourcentage d'objectifs atteints
+    public function getObjectivesCompletionPercentageAttribute()
+    {
+        $totalObjectives = $this->objectives()->count();
+
+        if ($totalObjectives === 0) {
+            return 0;
+        }
+
+        $completedObjectives = $this->objectives()->where('is_completed', true)->count();
+
+        return round(($completedObjectives / $totalObjectives) * 100);
+    }
+
     // Méthode pour calculer le temps total passé sur le projet (en minutes)
     public function getTotalTimeSpentAttribute()
     {
@@ -62,12 +81,6 @@ class Project extends Model
         $minutes = $totalMinutes % 60;
 
         return $hours . 'h ' . $minutes . 'm';
-    }
-
-    // Remplacez cette méthode par une version qui ne dépend pas des objectifs
-    public function getObjectivesCompletionPercentageAttribute()
-    {
-        return 0; // Retourner 0 temporairement puisque les objectifs n'existent pas encore
     }
 }
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ObjectiveController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -78,6 +79,11 @@ Route::middleware([
         // Création de tâche
         Route::get('/manager/tasks/create', [TaskController::class, 'create'])->name('tasks.create');
         Route::post('/manager/tasks', [TaskController::class, 'store'])->name('tasks.store');
+
+        Route::post('/projects/{project}/objectives', [ObjectiveController::class, 'store'])->name('objectives.store');
+        Route::put('/objectives/{objective}', [ObjectiveController::class, 'update'])->name('objectives.update');
+        Route::delete('/objectives/{objective}', [ObjectiveController::class, 'destroy'])->name('objectives.destroy');
+        Route::post('/objectives/{objective}/toggle', [ObjectiveController::class, 'toggleCompletion'])->name('objectives.toggle');
     });
 
     // Routes pour collaborateur

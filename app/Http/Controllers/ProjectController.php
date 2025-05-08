@@ -15,7 +15,7 @@ class ProjectController extends Controller
         $team = $user->currentTeam;
 
         $projects = Project::where('team_id', $team->id)
-            ->with(['creator:id,name', 'tasks'])
+            ->with(['creator:id,name', 'tasks', 'objectives'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -72,12 +72,14 @@ class ProjectController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Utilisez un tableau vide à la place
-        $objectives = [];
+        // Chargement des objectifs
+        $objectives = $project->objectives()
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // Calcul des KPIs
         $totalTimeSpent = $project->getFormattedTimeSpentAttribute();
-        $objectivesCompletionPercentage = 0; // Temporairement, définissez-le à 0
+        $objectivesCompletionPercentage = $project->getObjectivesCompletionPercentageAttribute();
 
         // Statistiques sur les tâches
         $taskStats = [

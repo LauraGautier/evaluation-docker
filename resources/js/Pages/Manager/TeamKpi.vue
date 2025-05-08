@@ -141,6 +141,89 @@
               </tbody>
             </table>
           </div>
+
+            <!-- Derniers objectifs atteints -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6 mb-6 mt-6">
+            <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">Derniers objectifs atteints</h3>
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Titre</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Projet</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Créé par</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date d'achèvement</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tr v-for="objective in teamKpiData.recentCompletedObjectives" :key="objective.id">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ objective.title }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ objective.project ? objective.project.name : 'N/A' }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ objective.creator ? objective.creator.name : 'N/A' }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(objective.completed_at) }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                    <Link :href="route('projects.show', objective.project_id)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
+                        Voir projet
+                    </Link>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+
+            <!-- Performance des projets -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">Performance des projets</h3>
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Projet</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Objectifs totaux</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Objectifs atteints</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Taux de complétion</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tr v-for="project in teamKpiData.projectsObjectivesStats" :key="project.id">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ project.name }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900 dark:text-gray-100">{{ project.totalObjectives }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900 dark:text-gray-100">{{ project.completedObjectives }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium" :class="getCompletionRateColor(project.completionRate)">
+                        {{ project.completionRate }}%
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                        <div class="h-2 rounded-full"
+                            :class="getProgressBarColor(project.completionRate)"
+                            :style="{ width: `${project.completionRate}%` }">
+                        </div>
+                    </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                    <Link :href="route('projects.show', project.id)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
+                        Voir détails
+                    </Link>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+
         </div>
       </div>
     </AppLayout>
@@ -172,8 +255,16 @@
           labels: this.teamKpiData.weeklyStats.map(stat => this.formatWeek(stat.week)),
           values: this.teamKpiData.weeklyStats.map(stat => stat.count)
         };
-      }
-    },
+      },
+
+      weeklyObjectivesChartData() {
+        // Préparer les données pour le graphique hebdomadaire des objectifs
+        return {
+        labels: this.teamKpiData.weeklyObjectivesStats.map(stat => this.formatWeek(stat.week)),
+        values: this.teamKpiData.weeklyObjectivesStats.map(stat => stat.count)
+        };
+    }
+},
 
     methods: {
       formatDate(dateString) {
@@ -213,7 +304,13 @@
         if (rate >= 80) return 'text-green-600 dark:text-green-400';
         if (rate >= 50) return 'text-yellow-600 dark:text-yellow-400';
         return 'text-red-600 dark:text-red-400';
-      }
+      },
+
+      getProgressBarColor(rate) {
+        if (rate >= 80) return 'bg-green-500';
+        if (rate >= 50) return 'bg-yellow-500';
+        return 'bg-red-500';
+      },
     }
   });
   </script>

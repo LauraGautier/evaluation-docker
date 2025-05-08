@@ -54,7 +54,16 @@
         .blue { color: #2563eb; }
         .orange { color: #f59e0b; }
         .purple { color: #8b5cf6; }
-
+        .section-header {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            background-color: #f0f4ff;
+            padding: 8px;
+            border-radius: 4px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -88,6 +97,20 @@
             border-top: 1px solid #eee;
             padding-top: 10px;
         }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e5e7eb;
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 3px;
+        }
+        .progress-bar {
+            height: 10px;
+            border-radius: 5px;
+        }
+        .progress-bar-green { background-color: #10b981; }
+        .progress-bar-yellow { background-color: #f59e0b; }
+        .progress-bar-red { background-color: #ef4444; }
     </style>
 </head>
 <body>
@@ -95,6 +118,9 @@
         <h1>Rapport de KPIs - Équipe {{ $team->name }}</h1>
         <p>Généré le {{ $dateGeneration }}</p>
     </div>
+
+    <!-- Section des tâches -->
+    <div class="section-header">Statistiques des tâches</div>
 
     <div class="kpi-summary">
         <div class="kpi-card">
@@ -116,6 +142,33 @@
         <div class="kpi-card">
             <h3>Tâches en attente</h3>
             <div class="kpi-value orange">{{ $teamKpiData['pendingTasks'] }}</div>
+        </div>
+    </div>
+
+    <!-- Section des objectifs -->
+    <div class="section-header">Statistiques des objectifs</div>
+
+    <div class="kpi-summary">
+        <div class="kpi-card">
+            <h3>Total des objectifs</h3>
+            <div class="kpi-value">{{ $teamKpiData['totalObjectives'] }}</div>
+        </div>
+
+        <div class="kpi-card">
+            <h3>Objectifs atteints</h3>
+            <div class="kpi-value green">{{ $teamKpiData['completedObjectives'] }}</div>
+            <div class="kpi-rate">Taux de complétion: {{ $teamKpiData['objectivesCompletionRate'] }}%</div>
+        </div>
+
+        <div class="kpi-card">
+            <h3>Objectifs en cours</h3>
+            <div class="kpi-value blue">{{ $teamKpiData['totalObjectives'] - $teamKpiData['completedObjectives'] }}</div>
+        </div>
+
+        <div class="kpi-card">
+            <h3>Objectifs par projet</h3>
+            <div class="kpi-value purple">{{ $teamKpiData['objectivesPerProject'] }}</div>
+            <div class="kpi-rate">Moyenne</div>
         </div>
     </div>
 
@@ -151,6 +204,37 @@
                             $formattedTime = $hours > 0 ? $hours . 'h ' . $minutes . 'min' : $minutes . 'min';
                         @endphp
                         {{ $formattedTime }}
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <h2 class="section-title">Performance des projets</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Projet</th>
+                <th>Objectifs totaux</th>
+                <th>Objectifs atteints</th>
+                <th>Taux de complétion</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($teamKpiData['projectsObjectivesStats'] as $project)
+                <tr>
+                    <td>{{ $project['name'] }}</td>
+                    <td>{{ $project['totalObjectives'] }}</td>
+                    <td>{{ $project['completedObjectives'] }}</td>
+                    <td>
+                        <span style="color: {{ $project['completionRate'] >= 80 ? '#10b981' : ($project['completionRate'] >= 50 ? '#f59e0b' : '#ef4444') }}">
+                            {{ $project['completionRate'] }}%
+                        </span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar {{ $project['completionRate'] >= 80 ? 'progress-bar-green' : ($project['completionRate'] >= 50 ? 'progress-bar-yellow' : 'progress-bar-red') }}"
+                                 style="width: {{ $project['completionRate'] }}%;">
+                            </div>
+                        </div>
                     </td>
                 </tr>
             @endforeach
@@ -199,8 +283,36 @@
         </tbody>
     </table>
 
+    <h2 class="section-title">Derniers objectifs atteints</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Titre</th>
+                <th>Projet</th>
+                <th>Créé par</th>
+                <th>Date d'achèvement</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($teamKpiData['recentCompletedObjectives'] as $objective)
+                <tr>
+                    <td>{{ $objective->title }}</td>
+                    <td>{{ $objective->project ? $objective->project->name : 'N/A' }}</td>
+                    <td>{{ $objective->creator ? $objective->creator->name : 'N/A' }}</td>
+                    <td>
+                        @if($objective->completed_at)
+                            {{ \Carbon\Carbon::parse($objective->completed_at)->format('d/m/Y') }}
+                        @else
+                            -
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
     <div class="footer">
-        <p>Ce rapport a été généré automatiquement par le système de gestion de tâches.</p>
+        <p>Ce rapport a été généré automatiquement par le système de gestion de tâches et objectifs.</p>
         <p>{{ $dateGeneration }}</p>
     </div>
 </body>
