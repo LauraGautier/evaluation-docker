@@ -107,6 +107,8 @@
             </div>
           </div>
 
+          <presence-section :presenceData="dashboardData.presenceData" />
+
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <!-- Projets récents -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
@@ -243,11 +245,13 @@
   <script>
   import { Link } from '@inertiajs/vue3';
   import AppLayout from '@/Layouts/AppLayout.vue';
+  import PresenceSection from '../../Components/Dashboard/PresenceSection.vue';
 
   export default {
     components: {
       AppLayout,
       Link,
+      PresenceSection,
     },
     props: {
       team: Object,

@@ -10,7 +10,8 @@ use App\Http\Controllers\{
     TaskController,
     ProjectController,
     ObjectiveController,
-    DashboardController
+    DashboardController,
+    UserPresenceController,
 };
 use App\Http\Middleware\CheckRole;
 
@@ -115,6 +116,9 @@ Route::middleware([
             'index', 'show'
         ]);
 
+        Route::get('/manager/team-presence', [UserPresenceController::class, 'teamPresence'])->name('manager.team.presence');
+        Route::get('/manager/collaborateur/{collaborateur}/presence', [UserPresenceController::class, 'userPresence'])->name('manager.user.presence');
+
         // Gestion des tâches
         Route::get('/manager/tasks', [TaskController::class, 'managerTasks'])->name('manager.tasks');
         Route::get('/manager/tasks/create', [TaskController::class, 'create'])->name('tasks.create');
@@ -137,5 +141,7 @@ Route::middleware([
         ->name('collaborateur.dashboard');
 
         Route::get('/collaborateur/tasks', [TaskController::class, 'collaborateurTasks'])->name('collaborateur.tasks');
+
+        Route::get('/collaborateur/my-presence', [UserPresenceController::class, 'userPresence'])->name('collaborateur.my.presence');
     });
 });

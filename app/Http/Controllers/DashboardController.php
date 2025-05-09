@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\Objective;
 use App\Models\User;
 use App\Models\ProductivityAlert;
+use App\Services\UserPresenceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -24,6 +25,24 @@ class DashboardController extends Controller
         }
 
         $team = $user->currentTeam;
+
+        // Bloc corrigé pour récupérer les données de présence
+        $presenceService = new UserPresenceService();
+
+        // Définir la période (7 derniers jours)
+        $startDate = Carbon::now()->subDays(7);
+        $endDate = Carbon::now();
+
+        // Calculer le nombre de jours ouvrés dans cette période
+        $workingDays = $this->countWorkingDays($startDate, $endDate);
+
+        // Récupérer les données avec le nombre correct de jours ouvrés
+        $presenceData = $presenceService->getTeamPresenceSummary($team, $workingDays);
+
+        // Récupérer les données détaillées de présence par jour pour les 7 derniers jours
+        $startDate = Carbon::now()->subDays(7);
+        $endDate = Carbon::now();
+        $dailyPresence = $presenceService->getDailyPresenceForTeam($team, $startDate, $endDate);
 
         // Projets récents avec leurs objectifs
         $recentProjects = Project::where('team_id', $team->id)
@@ -236,19 +255,28 @@ class DashboardController extends Controller
 
             // Regrouper toutes les données du dashboard
             $dashboardData = [
-            'activeProjects' => $activeProjects,
-            'inProgressTasks' => $inProgressTasks,
-            'pendingObjectives' => $pendingObjectives,
-            'completionRate' => $completionRate,
-            'recentProjects' => $recentProjects,
-            'teamPerformance' => $teamPerformance,
-            'urgentTasks' => $urgentTasks,
-            'recentActivities' => $recentActivities
+                'activeProjects' => $activeProjects,
+                'inProgressTasks' => $inProgressTasks,
+                'pendingObjectives' => $pendingObjectives,
+                'completionRate' => $completionRate,
+                'recentProjects' => $recentProjects,
+                'teamPerformance' => $teamPerformance,
+                'urgentTasks' => $urgentTasks,
+                'recentActivities' => $recentActivities,
+                // Ajout des données de présence directement ici
+                'presenceData' => [
+                    'summary' => $presenceData,
+                    'period' => [
+                        'start' => Carbon::now()->subDays(7)->format('Y-m-d'),
+                        'end' => Carbon::now()->format('Y-m-d'),
+                        'workingDays' => $workingDays
+                    ]
+                ]
             ];
 
             return Inertia::render('Manager/Dashboard', [
-            'team' => $team->only('id', 'name'),
-            'dashboardData' => $dashboardData
+                'team' => $team->only('id', 'name'),
+                'dashboardData' => $dashboardData
             ]);
 
 // Ajouter dans votre contrôleur
@@ -598,4 +626,23 @@ private function getPerformanceChartData($userId, $teamIds)
         'xType' => 'date'
     ];
 }
+
+    /**
+     * Compte le nombre de jours ouvrés (Lundi-Vendredi) entre deux dates
+     */
+    private function countWorkingDays(Carbon $startDate, Carbon $endDate)
+    {
+        $days = 0;
+        $currentDate = $startDate->copy();
+
+        while ($currentDate->lte($endDate)) {
+            // 0 = dimanche, 6 = samedi
+            if (!in_array($currentDate->dayOfWeek, [0, 6])) {
+                $days++;
             }
+            $currentDate->addDay();
+        }
+
+        return $days;
+    }
+}
