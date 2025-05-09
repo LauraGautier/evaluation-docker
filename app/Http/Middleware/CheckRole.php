@@ -7,12 +7,9 @@ use Illuminate\Http\Request;
 
 class CheckRole
 {
-    /**
-     * Handle an incoming request.
-     */
-    public function handle(Request $request, Closure $next, string $role)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
-        if (!$request->user() || $request->user()->role !== $role) {
+        if (!$request->user() || !in_array($request->user()->role, $roles)) {
             return redirect()->route('access.denied')->with('error', 'Accès non autorisé');
         }
 
