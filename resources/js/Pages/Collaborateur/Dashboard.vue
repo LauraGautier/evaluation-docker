@@ -43,6 +43,13 @@
             </div>
           </div>
 
+        <!-- Alerte de productivité (si des tâches sont en retard) -->
+        <ProductivityAlert
+            v-if="dashboardData.hasDelayedTasks"
+            :tasks="dashboardData.delayedTasks"
+            :threshold="dashboardData.alertThreshold"
+          />
+
           <!-- Cartes de résumé -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             <!-- Mes tâches -->
@@ -301,6 +308,12 @@
           </div>
         </div>
       </div>
+      <ProductivityAlertModal
+      v-if="dashboardData.hasDelayedTasks"
+      :tasks="dashboardData.delayedTasks"
+      :threshold="dashboardData.alertThreshold"
+      auto-show
+    />
     </AppLayout>
   </template>
 
@@ -309,12 +322,16 @@
   import { router } from '@inertiajs/vue3';
   import AppLayout from '@/Layouts/AppLayout.vue';
   import PerformanceChart from '@/Components/Charts/PerformanceChart.vue';
+  import ProductivityAlert from '@/Components/Collaborateur/ProductivityAlert.vue';
+  import ProductivityAlertModal from '@/Components/Collaborateur/ProductivityAlertModal.vue';
 
   export default {
     components: {
       AppLayout,
       Link,
-      PerformanceChart
+      PerformanceChart,
+      ProductivityAlert,
+      ProductivityAlertModal,
     },
     props: {
       user: Object,

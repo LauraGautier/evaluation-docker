@@ -6,6 +6,7 @@ use App\Models\Task;
 use App\Models\Project;
 use App\Models\Objective;
 use App\Models\User;
+use App\Models\ProductivityAlert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -403,6 +404,31 @@ public function collaborateurDashboard(Request $request)
         'stats' => $stats,
         'performanceChartData' => $performanceChartData
     ];
+
+ // Ajouter les alertes de tâches en retard
+ $delayedTasks = ProductivityAlert::getCollaborateurDelayedTasks($user->id);
+
+ // Assembler les données du dashboard
+ $dashboardData = [
+     // Données existantes...
+     'totalTasks' => $totalTasks,
+     'completedTasks' => $completedTasks,
+     'inProgressTasks' => $inProgressTasks,
+     'pendingTasks' => $pendingTasks,
+     'completionRate' => $completionRate,
+     'dayMessage' => $dayMessage,
+     'tasksDueToday' => $tasksDueToday,
+     'priorityTasks' => $priorityTasks,
+     'inProgressTaskList' => $inProgressTaskList,
+     'projects' => $projects,
+     'stats' => $stats,
+     'performanceChartData' => $performanceChartData,
+
+     // Ajout des tâches en retard
+     'delayedTasks' => $delayedTasks,
+     'hasDelayedTasks' => $delayedTasks->count() > 0,
+     'alertThreshold' => ProductivityAlert::ALERT_THRESHOLD_DAYS
+ ];
 
     return Inertia::render('Collaborateur/Dashboard', [
         'user' => $user->only('id', 'name', 'email'),
