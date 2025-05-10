@@ -39,7 +39,7 @@ class AdminController extends Controller
                 'collaborateur' => User::where('role', 'collaborateur')->count(),
             ],
             'recentlyRegistered' => User::orderBy('created_at', 'desc')
-                ->take(5)
+                ->take(3)
                 ->get()
                 ->map(function ($user) {
                     return [
@@ -58,30 +58,17 @@ class AdminController extends Controller
             'personalTeams' => Team::where('personal_team', true)->count(),
             'organizationTeams' => Team::where('personal_team', false)->count(),
             'recentTeams' => Team::orderBy('created_at', 'desc')
-                ->take(5)
+                ->take(3)
                 ->get()
                 ->map(function ($team) {
                     return [
                         'id' => $team->id,
                         'name' => $team->name,
-                        'owner' => $team->owner->name,
+                        'owner' => $team->owner ? $team->owner->name : 'N/A',
                         'members_count' => $team->users()->count(),
                         'created_at' => $team->created_at->format('d/m/Y'),
                     ];
-                }),
-            // Équipes avec le plus de membres
-            'largestTeams' => Team::withCount('users')
-                ->orderBy('users_count', 'desc')
-                ->take(5)
-                ->get()
-                ->map(function ($team) {
-                    return [
-                        'id' => $team->id,
-                        'name' => $team->name,
-                        'owner' => $team->owner->name,
-                        'members_count' => $team->users_count,
-                    ];
-                }),
+                })
         ];
 
         // Statistiques sur les projets
@@ -94,14 +81,14 @@ class AdminController extends Controller
             ],
             'recentProjects' => Project::with('team:id,name', 'creator:id,name')
                 ->orderBy('created_at', 'desc')
-                ->take(5)
+                ->take(3)
                 ->get()
                 ->map(function ($project) {
                     return [
                         'id' => $project->id,
                         'name' => $project->name,
-                        'team' => $project->team->name,
-                        'creator' => $project->creator->name,
+                        'team' => $project->team ? $project->team->name : 'N/A',
+                        'creator' => $project->creator ? $project->creator->name : 'N/A',
                         'status' => $project->status,
                         'created_at' => $project->created_at->format('d/m/Y'),
                     ];
@@ -119,15 +106,15 @@ class AdminController extends Controller
             'recentlyCompleted' => Task::where('status', 'completed')
                 ->with(['assignedTo:id,name', 'team:id,name'])
                 ->orderBy('end_time', 'desc')
-                ->take(5)
+                ->take(3)
                 ->get()
                 ->map(function ($task) {
                     return [
                         'id' => $task->id,
                         'title' => $task->title,
-                        'assigned_to' => $task->assignedTo->name,
-                        'team' => $task->team->name,
-                        'completed_at' => Carbon::parse($task->end_time)->format('d/m/Y H:i'),
+                        'assigned_to' => $task->assignedTo ? $task->assignedTo->name : 'N/A',
+                        'team' => $task->team ? $task->team->name : 'N/A',
+                        'completed_at' => $task->end_time ? Carbon::parse($task->end_time)->format('d/m/Y H:i') : 'N/A',
                     ];
                 }),
         ];
@@ -166,7 +153,7 @@ class AdminController extends Controller
         // Utilisateurs récemment créés
         $newUsers = User::select('id', 'name', 'created_at')
             ->orderBy('created_at', 'desc')
-            ->take(5)
+            ->take(3)
             ->get()
             ->map(function ($user) {
                 return [
@@ -181,13 +168,13 @@ class AdminController extends Controller
         $newTeams = Team::select('id', 'name', 'user_id', 'created_at')
             ->with('owner:id,name')
             ->orderBy('created_at', 'desc')
-            ->take(5)
+            ->take(3)
             ->get()
             ->map(function ($team) {
                 return [
                     'type' => 'team_created',
                     'title' => 'Nouvelle équipe',
-                    'description' => "L'équipe {$team->name} a été créée par {$team->owner->name}",
+                    'description' => "L'équipe {$team->name} a été créée par " . ($team->owner ? $team->owner->name : 'Utilisateur inconnu'),
                     'time' => $team->created_at,
                 ];
             });
@@ -196,13 +183,13 @@ class AdminController extends Controller
         $newProjects = Project::select('id', 'name', 'created_by', 'created_at')
             ->with('creator:id,name')
             ->orderBy('created_at', 'desc')
-            ->take(5)
+            ->take(3)
             ->get()
             ->map(function ($project) {
                 return [
                     'type' => 'project_created',
                     'title' => 'Nouveau projet',
-                    'description' => "Le projet {$project->name} a été créé par {$project->creator->name}",
+                    'description' => "Le projet {$project->name} a été créé par " . ($project->creator ? $project->creator->name : 'Utilisateur inconnu'),
                     'time' => $project->created_at,
                 ];
             });
@@ -213,13 +200,13 @@ class AdminController extends Controller
             ->whereNotNull('end_time')
             ->with('assignedTo:id,name')
             ->orderBy('end_time', 'desc')
-            ->take(5)
+            ->take(3)
             ->get()
             ->map(function ($task) {
                 return [
                     'type' => 'task_completed',
                     'title' => 'Tâche terminée',
-                    'description' => "La tâche \"{$task->title}\" a été terminée par {$task->assignedTo->name}",
+                    'description' => "La tâche \"{$task->title}\" a été terminée par " . ($task->assignedTo ? $task->assignedTo->name : 'Utilisateur inconnu'),
                     'time' => $task->end_time,
                 ];
             });
@@ -230,7 +217,7 @@ class AdminController extends Controller
             ->whereNotNull('completed_at')
             ->with('creator:id,name')
             ->orderBy('completed_at', 'desc')
-            ->take(5)
+            ->take(3)
             ->get()
             ->map(function ($objective) {
                 return [
@@ -249,7 +236,7 @@ class AdminController extends Controller
             ->merge($completedTasks)
             ->merge($completedObjectives)
             ->sortByDesc('time')
-            ->take(10)
+            ->take(5)
             ->values()
             ->all();
 
@@ -344,7 +331,7 @@ class AdminController extends Controller
         // Charger les équipes manuellement pour chaque utilisateur
         $users->getCollection()->transform(function ($user) {
             // Ajouter une propriété calculée pour le nombre d'équipes
-            $user->teams_count = $user->allTeams()->count();
+            $user->teams_count = $user->teams()->count();
             return $user;
         });
 
@@ -415,7 +402,7 @@ class AdminController extends Controller
 
         return Inertia::render('Admin/EditUser', [
             'user' => $user,
-            'userTeams' => $user->allTeams()->pluck('id'),
+            'userTeams' => $user->teams()->pluck('teams.id'),
             'teams' => $teams,
         ]);
     }
@@ -442,12 +429,12 @@ class AdminController extends Controller
         if (isset($validated['teams'])) {
             foreach (Team::all() as $team) {
                 if (in_array($team->id, $validated['teams'])) {
-                    if (!$user->belongsToTeam($team)) {
+                    if (!$team->users()->where('user_id', $user->id)->exists()) {
                         $team->users()->attach($user, ['role' => $user->role]);
                     }
                 } else {
-                    if ($user->belongsToTeam($team)) {
-                        $team->removeUser($user);
+                    if ($team->users()->where('user_id', $user->id)->exists()) {
+                        $team->users()->detach($user);
                     }
                 }
             }
@@ -601,7 +588,7 @@ class AdminController extends Controller
         $team = new Team();
         $team->name = $validated['name'];
         $team->user_id = $validated['owner_id'];
-        $team->personal_team = $validated['personal_team'] ?? false;
+        $team->personal_team = true;
         $team->save();
 
         // Si l'équipe n'est pas personnelle, ajouter le propriétaire comme membre
@@ -624,7 +611,7 @@ class AdminController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
-                'team_role' => $user->membership->role,
+                'team_role' => $user->pivot ? $user->pivot->role : 'N/A',
             ];
         });
 
@@ -712,12 +699,93 @@ class AdminController extends Controller
         $user = User::findOrFail($validated['user_id']);
 
         // Vérifier si l'utilisateur n'est pas déjà membre de l'équipe
-        if (!$user->belongsToTeam($team)) {
+        if (!$team->users()->where('user_id', $user->id)->exists()) {
             $team->users()->attach($user, ['role' => $validated['role']]);
             return redirect()->route('admin.teams.show', $team->id)->with('success', 'Membre ajouté avec succès');
         }
 
         return redirect()->back()->with('error', 'Cet utilisateur est déjà membre de l\'équipe');
+    }
+
+    /**
+     * Afficher le formulaire d'édition d'un membre d'équipe
+     */
+    public function editTeamMember(Team $team, User $user)
+    {
+        // Vérifier que l'utilisateur est bien membre de l'équipe
+        if (!$user->belongsToTeam($team)) {
+            return redirect()->route('admin.teams.show', $team->id)
+                ->with('error', 'Cet utilisateur n\'est pas membre de l\'équipe');
+        }
+
+        // Récupérer le rôle actuel du membre dans l'équipe
+        $membership = DB::table('team_user')
+            ->where('team_id', $team->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        return Inertia::render('Admin/EditTeamMember', [
+            'team' => [
+                'id' => $team->id,
+                'name' => $team->name,
+            ],
+            'member' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'team_role' => $membership ? $membership->role : 'collaborateur',
+            ],
+        ]);
+    }
+
+    /**
+     * Mettre à jour le rôle d'un membre dans une équipe
+     */
+    public function updateTeamMember(Request $request, Team $team, User $user)
+    {
+        $validated = $request->validate([
+            'role' => 'required|in:administrateur,manager,collaborateur',
+        ]);
+
+        // Vérifier que l'utilisateur est bien membre de l'équipe
+        if (!$user->belongsToTeam($team)) {
+            return redirect()->route('admin.teams.show', $team->id)
+                ->with('error', 'Cet utilisateur n\'est pas membre de l\'équipe');
+        }
+
+        // Mettre à jour le rôle dans la table pivot
+        $team->users()->updateExistingPivot($user->id, ['role' => $validated['role']]);
+
+        return redirect()->route('admin.teams.show', $team->id)
+            ->with('success', 'Rôle du membre mis à jour avec succès');
+    }
+
+    /**
+     * Supprimer un membre d'une équipe
+     */
+    public function destroyTeamMember(Team $team, User $user)
+    {
+        // Vérifier que l'équipe n'est pas personnelle
+        if ($team->personal_team) {
+            return redirect()->back()->with('error', 'Vous ne pouvez pas retirer des membres d\'une équipe personnelle');
+        }
+
+        // Vérifier que l'utilisateur n'est pas le propriétaire de l'équipe
+        if ($team->user_id === $user->id) {
+            return redirect()->back()->with('error', 'Vous ne pouvez pas retirer le propriétaire de l\'équipe');
+        }
+
+        // Vérifier que l'utilisateur est bien membre de l'équipe
+        if (!$user->belongsToTeam($team)) {
+            return redirect()->back()->with('error', 'Cet utilisateur n\'est pas membre de l\'équipe');
+        }
+
+        // Retirer le membre de l'équipe
+        $team->removeUser($user);
+
+        return redirect()->route('admin.teams.show', $team->id)
+            ->with('success', 'Membre retiré de l\'équipe avec succès');
     }
 
 /**
@@ -763,7 +831,7 @@ public function editTeam(Team $team)
             $newOwner = User::findOrFail($validated['owner_id']);
 
             // S'assurer que le nouveau propriétaire est membre de l'équipe
-            if (!$newOwner->belongsToTeam($team)) {
+            if (!$team->users()->where('user_id', $newOwner->id)->exists()) {
                 $team->users()->attach($newOwner, ['role' => $newOwner->role]);
             }
 
@@ -834,7 +902,9 @@ public function editTeam(Team $team)
 
         // Associer les utilisateurs assignés si spécifiés
         if (isset($validated['assigned_users']) && is_array($validated['assigned_users'])) {
-            $project->assignedUsers()->attach($validated['assigned_users']);
+            // Note: Assurez-vous que la relation existe dans le modèle Project
+            // Si elle n'existe pas, vous devrez créer une nouvelle table pivot
+            // $project->assignedUsers()->attach($validated['assigned_users']);
         }
 
         // Rediriger vers la liste des projets ou les détails du projet créé

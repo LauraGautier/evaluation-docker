@@ -45,21 +45,6 @@
                   </select>
                   <div v-if="errors.owner_id" class="text-red-500 text-sm mt-1">{{ errors.owner_id }}</div>
                 </div>
-
-                <!-- Type d'équipe -->
-                <div>
-                  <label class="flex items-center">
-                    <input
-                      type="checkbox"
-                      v-model="form.personal_team"
-                      class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    >
-                    <span class="ml-2 text-sm text-gray-600">Équipe personnelle</span>
-                  </label>
-                  <div class="mt-1 text-sm text-gray-500">
-                    Une équipe personnelle est associée directement à un utilisateur spécifique et ne peut généralement pas être supprimée.
-                  </div>
-                </div>
               </div>
 
               <div class="mt-8 border-t pt-6 flex justify-end">

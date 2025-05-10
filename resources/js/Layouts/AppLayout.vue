@@ -86,6 +86,15 @@ const logout = () => {
                                     <NavLink :href="route('admin.dashboard')" :active="route().current('admin.dashboard')">
                                         Dashboard
                                     </NavLink>
+                                    <NavLink :href="route('admin.users.list')" :active="route().current('admin.users.*')">
+                                        Utilisateurs
+                                    </NavLink>
+                                    <NavLink :href="route('admin.teams.list')" :active="route().current('admin.teams.*')">
+                                        Équipes
+                                    </NavLink>
+                                    <NavLink :href="route('admin.system.logs')" :active="route().current('admin.system.*')">
+                                        Système
+                                    </NavLink>
                                 </template>
                             </div>
                         </div>
@@ -193,7 +202,6 @@ const logout = () => {
 
                                         <div class="border-t border-gray-200 dark:border-gray-600" />
 
-
                                         <div class="block px-4 py-2 text-xs text-gray-400">
                                             <DarkModeToggle />
                                         </div>
@@ -275,6 +283,15 @@ const logout = () => {
                             <ResponsiveNavLink :href="route('admin.dashboard')" :active="route().current('admin.dashboard')">
                                 Dashboard
                             </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('admin.users.list')" :active="route().current('admin.users.*')">
+                                Utilisateurs
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('admin.teams.list')" :active="route().current('admin.teams.*')">
+                                Équipes
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('admin.system.logs')" :active="route().current('admin.system.*')">
+                                Système
+                            </ResponsiveNavLink>
                         </template>
                     </div>
 
@@ -310,6 +327,10 @@ const logout = () => {
                                     Log Out
                                 </ResponsiveNavLink>
                             </form>
+
+                            <div class="border-t border-gray-200 dark:border-gray-600" />
+
+                            <DarkModeToggle />
 
                             <!-- Team Management -->
                             <template v-if="$page.props.jetstream.hasTeamFeatures">

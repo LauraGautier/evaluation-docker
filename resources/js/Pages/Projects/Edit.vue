@@ -150,7 +150,7 @@
   </template>
 
   <script>
-  import { Link, useForm } from '@inertiajs/vue3';
+  import { Link, useForm, router } from '@inertiajs/vue3';
   import AppLayout from '@/Layouts/AppLayout.vue';
 
   export default {
@@ -197,7 +197,7 @@
         this.showDeleteModal = true;
       },
       deleteProject() {
-        Inertia.delete(route('projects.destroy', this.project.id), {
+        router.delete(route('projects.destroy', this.project.id), {
           onBefore: () => {
             return confirm('Cette action est irréversible. Êtes-vous sûr de vouloir continuer ?');
           },

@@ -13,30 +13,18 @@
 
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-stretch">
             <!-- Informations de l'équipe -->
-            <div class="lg:col-span-1">
-              <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+            <div class="lg:col-span-1 flex">
+              <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 w-full flex flex-col">
                 <h3 class="text-lg font-medium text-gray-900 border-b pb-2 mb-4">
                   Informations de l'équipe
                 </h3>
 
-                <div class="space-y-4">
+                <div class="space-y-4 flex-grow">
                   <div>
                     <div class="text-sm font-medium text-gray-500">Nom:</div>
                     <div class="mt-1 text-sm text-gray-900">{{ team.name }}</div>
-                  </div>
-
-                  <div>
-                    <div class="text-sm font-medium text-gray-500">Type:</div>
-                    <div class="mt-1 text-sm text-gray-900">
-                      <span
-                        class="px-2 py-1 text-xs rounded-full"
-                        :class="team.personal_team ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'"
-                      >
-                        {{ team.personal_team ? 'Équipe personnelle' : 'Équipe d\'organisation' }}
-                      </span>
-                    </div>
                   </div>
 
                   <div>
@@ -59,24 +47,10 @@
                     <div class="text-sm font-medium text-gray-500">Date de création:</div>
                     <div class="mt-1 text-sm text-gray-900">{{ formatDate(team.created_at) }}</div>
                   </div>
-
-                  <div>
-                    <div class="text-sm font-medium text-gray-500">Projets:</div>
-                    <div class="mt-1 text-sm text-gray-900">{{ projects.length }}</div>
-                  </div>
                 </div>
 
                 <div class="mt-6 border-t pt-4">
-                  <h4 class="text-md font-medium text-gray-700 mb-3">Actions</h4>
-
                   <div class="space-y-3">
-                    <Link
-                      :href="route('admin.teams.edit', team.id)"
-                      class="inline-flex w-full items-center justify-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"
-                    >
-                      <i class="fas fa-edit mr-2"></i> Modifier l'équipe
-                    </Link>
-
                     <button
                       v-if="!team.personal_team"
                       type="button"
@@ -91,8 +65,8 @@
             </div>
 
             <!-- Membres de l'équipe -->
-            <div class="lg:col-span-2">
-              <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+            <div class="lg:col-span-2 flex">
+              <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 w-full">
                 <div class="flex justify-between items-center mb-4">
                   <h3 class="text-lg font-medium text-gray-900">
                     Membres de l'équipe
@@ -111,8 +85,6 @@
                     <thead class="bg-gray-100">
                       <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateur</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
                         <th scope="col" class="relative px-6 py-3">
                           <span class="sr-only">Actions</span>
                         </th>
@@ -120,7 +92,7 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                       <tr v-if="members.length === 0">
-                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                        <td colspan="2" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                           Aucun membre dans cette équipe.
                         </td>
                       </tr>
@@ -134,29 +106,13 @@
                               </div>
                             </div>
                             <div class="ml-4">
-                              <div class="text-sm font-medium text-gray-900">{{ member.name }}</div>
+                              <div class="text-sm font-medium text-gray-900">
+                                {{ member.name }}
+                                <span v-if="member.id === team.owner?.id" class="ml-2 text-xs text-gray-500">(Propriétaire)</span>
+                              </div>
                               <div class="text-sm text-gray-500">{{ member.email }}</div>
                             </div>
                           </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="flex items-center">
-                            <span
-                              class="px-2 py-1 text-xs rounded-full"
-                              :class="getRoleBadgeClass(member.team_role)"
-                            >
-                              {{ member.team_role }}
-                            </span>
-
-                            <div v-if="member.id === team.owner?.id" class="ml-2 text-xs text-gray-500">(Propriétaire)</div>
-                          </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <span
-                            class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800"
-                          >
-                            Actif
-                          </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button
@@ -175,78 +131,6 @@
                           >
                             Retirer
                           </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Projets de l'équipe -->
-              <div class="mt-6 bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                  <h3 class="text-lg font-medium text-gray-900">
-                    Projets de l'équipe
-                  </h3>
-                  <Link
-                    :href="route('admin.projects.create', { team_id: team.id })"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring focus:ring-blue-300 disabled:opacity-25 transition"
-                  >
-                    <i class="fas fa-plus mr-2"></i> Nouveau projet
-                  </Link>
-                </div>
-
-                <div class="overflow-x-auto bg-gray-50 rounded-lg">
-                  <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-100">
-                      <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tâches</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Créé le</th>
-                        <th scope="col" class="relative px-6 py-3">
-                          <span class="sr-only">Actions</span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                      <tr v-if="projects.length === 0">
-                        <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                          Aucun projet pour cette équipe.
-                        </td>
-                      </tr>
-                      <tr v-for="project in projects" :key="project.id">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="text-sm font-medium text-gray-900">{{ project.name }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <span
-                            class="px-2 py-1 text-xs rounded-full"
-                            :class="getStatusBadgeClass(project.status)"
-                          >
-                            {{ formatStatus(project.status) }}
-                          </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {{ project.tasks_count || 0 }} tâches
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {{ formatDate(project.created_at) }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <Link
-                            :href="route('admin.projects.show', project.id)"
-                            class="text-blue-600 hover:text-blue-900 mr-3"
-                          >
-                            Détails
-                          </Link>
-
-                          <Link
-                            :href="route('admin.projects.edit', project.id)"
-                            class="text-green-600 hover:text-green-900 mr-3"
-                          >
-                            Modifier
-                          </Link>
                         </td>
                       </tr>
                     </tbody>

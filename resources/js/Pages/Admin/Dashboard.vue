@@ -88,7 +88,7 @@
               </div>
 
               <div class="md:col-span-2">
-                <h4 class="text-md font-medium mb-2">Utilisateurs récemment inscrits</h4>
+                <h4 class="text-md font-medium mb-2">Utilisateurs récemment enregistrés</h4>
                 <div class="bg-gray-100 p-4 rounded-lg">
                   <div v-if="userStats.recentlyRegistered.length === 0" class="text-gray-500 text-center py-4">
                     Aucun utilisateur récemment inscrit
@@ -117,16 +117,15 @@
             <div class="flex justify-between items-center mb-4">
               <h3 class="text-lg font-semibold text-gray-700">Équipes</h3>
               <Link href="/admin/teams" class="text-blue-600 hover:text-blue-800">
-                Voir toutes les équipes
+                Voir les détails
               </Link>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
               <div>
-                <h4 class="text-md font-medium mb-2">Équipes récentes</h4>
                 <div class="bg-gray-100 p-4 rounded-lg">
                   <div v-if="teamStats.recentTeams.length === 0" class="text-gray-500 text-center py-4">
-                    Aucune équipe récente
+                    Aucune équipe enregistrée
                   </div>
                   <div v-else class="space-y-2">
                     <div v-for="team in teamStats.recentTeams" :key="team.id" class="flex justify-between">
