@@ -8,6 +8,8 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
+import MessageNotificationIcon from '@/Components/MessageNotificationIcon.vue';
+import AppFooter from '@/Components/AppFooter.vue';
 
 defineProps({
     title: String,
@@ -29,12 +31,13 @@ const logout = () => {
 </script>
 
 <template>
-    <div>
+    <div class="min-h-screen flex flex-col">
         <Head :title="title" />
 
         <Banner />
 
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <!-- Main content wrapper -->
+        <div class="flex-1 bg-gray-100 dark:bg-gray-900">
             <nav class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
                 <!-- Primary Navigation Menu -->
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,13 +56,13 @@ const logout = () => {
                                 <!-- Routes pour Manager -->
                                 <template v-if="$page.props.auth.user.role === 'manager'">
                                     <NavLink :href="route('manager.dashboard')" :active="route().current('manager.dashboard')">
-                                        Tableau de Bord
+                                        Tableau de bord
                                     </NavLink>
                                     <NavLink :href="route('projects.index')" :active="route().current('projects.*')">
-                                        Gestion des Projets
+                                        Projets
                                     </NavLink>
                                     <NavLink :href="route('manager.tasks')" :active="route().current('manager.tasks')">
-                                        Gestion des Tâches
+                                        Tâches
                                     </NavLink>
                                     <!-- Nouvelles routes KPI -->
                                     <NavLink :href="route('manager.team.kpi')" :active="route().current('manager.team.kpi')">
@@ -70,10 +73,10 @@ const logout = () => {
                                 <!-- Routes pour Collaborateur -->
                                 <template v-if="$page.props.auth.user.role === 'collaborateur'">
                                     <NavLink :href="route('collaborateur.dashboard')" :active="route().current('collaborateur.dashboard')">
-                                        Dashboard
+                                        Tableau de bord
                                     </NavLink>
                                     <NavLink :href="route('collaborateur.tasks')" :active="route().current('collaborateur.tasks')">
-                                        Mes Tâches
+                                        Mes tâches
                                     </NavLink>
                                     <!-- Nouvelle route KPI -->
                                     <NavLink :href="route('my.kpi')" :active="route().current('my.kpi')">
@@ -84,7 +87,7 @@ const logout = () => {
                                 <!-- Routes pour Admin -->
                                 <template v-if="$page.props.auth.user.role === 'administrateur'">
                                     <NavLink :href="route('admin.dashboard')" :active="route().current('admin.dashboard')">
-                                        Dashboard
+                                        Tableau de bord
                                     </NavLink>
                                     <NavLink :href="route('admin.users.list')" :active="route().current('admin.users.*')">
                                         Utilisateurs
@@ -100,6 +103,11 @@ const logout = () => {
                         </div>
 
                         <div class="hidden sm:flex sm:items-center sm:ms-6">
+                            <!-- Message Notification Icon -->
+                            <div class="ms-3">
+                                <MessageNotificationIcon />
+                            </div>
+
                             <div class="ms-3 relative">
                                 <!-- Teams Dropdown -->
                                 <Dropdown v-if="$page.props.jetstream.hasTeamFeatures && $page.props.auth.user.role === 'manager'" align="right" width="60">
@@ -119,16 +127,16 @@ const logout = () => {
                                         <div class="w-60">
                                             <!-- Team Management -->
                                             <div class="block px-4 py-2 text-xs text-gray-400">
-                                                Manage Team
+                                                Gestion de l'équipe
                                             </div>
 
                                             <!-- Team Settings -->
                                             <DropdownLink :href="route('teams.show', $page.props.auth.user.current_team)">
-                                                Team Settings
+                                                Paramètres de l'équipe
                                             </DropdownLink>
 
                                             <DropdownLink v-if="$page.props.jetstream.canCreateTeams" :href="route('teams.create')">
-                                                Create New Team
+                                                Créer une nouvelle équipe
                                             </DropdownLink>
 
                                             <!-- Team Switcher -->
@@ -136,7 +144,7 @@ const logout = () => {
                                                 <div class="border-t border-gray-200 dark:border-gray-600" />
 
                                                 <div class="block px-4 py-2 text-xs text-gray-400">
-                                                    Switch Teams
+                                                    Changer d'équipe
                                                 </div>
 
                                                 <template v-for="team in $page.props.auth.user.all_teams" :key="team.id">
@@ -180,15 +188,15 @@ const logout = () => {
                                     <template #content>
                                         <!-- Account Management -->
                                         <div class="block px-4 py-2 text-xs text-gray-400">
-                                            Manage Account
+                                            Gestion du compte
                                         </div>
 
                                         <DropdownLink :href="route('profile.show')">
-                                            Profile
+                                            Profil
                                         </DropdownLink>
 
                                         <DropdownLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')">
-                                            API Tokens
+                                            Jetons API
                                         </DropdownLink>
 
                                         <div class="border-t border-gray-200 dark:border-gray-600" />
@@ -196,7 +204,7 @@ const logout = () => {
                                         <!-- Authentication -->
                                         <form @submit.prevent="logout">
                                             <DropdownLink as="button">
-                                                Log Out
+                                                Déconnexion
                                             </DropdownLink>
                                         </form>
 
@@ -247,10 +255,10 @@ const logout = () => {
                         <!-- Routes pour Manager -->
                         <template v-if="$page.props.auth.user.role === 'manager'">
                             <ResponsiveNavLink :href="route('manager.dashboard')" :active="route().current('manager.dashboard')">
-                                Dashboard
+                                Tableau de bord
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('manager.tasks')" :active="route().current('manager.tasks')">
-                                Gestion des Tâches
+                                Tâches
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('tasks.create')" :active="route().current('tasks.create')">
                                 Créer une tâche
@@ -267,10 +275,10 @@ const logout = () => {
                         <!-- Routes pour Collaborateur -->
                         <template v-if="$page.props.auth.user.role === 'collaborateur'">
                             <ResponsiveNavLink :href="route('collaborateur.dashboard')" :active="route().current('collaborateur.dashboard')">
-                                Dashboard
+                                Tableau de bord
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('collaborateur.tasks')" :active="route().current('collaborateur.tasks')">
-                                Mes Tâches
+                                Mes tâches
                             </ResponsiveNavLink>
                             <!-- Nouvelle route KPI -->
                             <ResponsiveNavLink :href="route('my.kpi')" :active="route().current('my.kpi')">
@@ -281,7 +289,7 @@ const logout = () => {
                         <!-- Routes pour Admin -->
                         <template v-if="$page.props.auth.user.role === 'administrateur'">
                             <ResponsiveNavLink :href="route('admin.dashboard')" :active="route().current('admin.dashboard')">
-                                Dashboard
+                                Tableau de bord
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('admin.users.list')" :active="route().current('admin.users.*')">
                                 Utilisateurs
@@ -314,17 +322,21 @@ const logout = () => {
 
                         <div class="mt-3 space-y-1">
                             <ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')">
-                                Profile
+                                Profil
+                            </ResponsiveNavLink>
+
+                            <ResponsiveNavLink :href="route('messages.index')" :active="route().current('messages.*')">
+                                Messages
                             </ResponsiveNavLink>
 
                             <ResponsiveNavLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')" :active="route().current('api-tokens.index')">
-                                API Tokens
+                                Jetons API
                             </ResponsiveNavLink>
 
                             <!-- Authentication -->
                             <form method="POST" @submit.prevent="logout">
                                 <ResponsiveNavLink as="button">
-                                    Log Out
+                                    Déconnexion
                                 </ResponsiveNavLink>
                             </form>
 
@@ -337,16 +349,16 @@ const logout = () => {
                                 <div class="border-t border-gray-200 dark:border-gray-600" />
 
                                 <div class="block px-4 py-2 text-xs text-gray-400">
-                                    Manage Team
+                                    Gestion de l'équipe
                                 </div>
 
                                 <!-- Team Settings -->
                                 <ResponsiveNavLink v-if="$page.props.auth.user.current_team" :href="route('teams.show', $page.props.auth.user.current_team)" :active="route().current('teams.show')">
-                                    Team Settings
+                                    Paramètres de l'équipe
                                 </ResponsiveNavLink>
 
                                 <ResponsiveNavLink v-if="$page.props.jetstream.canCreateTeams" :href="route('teams.create')" :active="route().current('teams.create')">
-                                    Create New Team
+                                    Créer une nouvelle équipe
                                 </ResponsiveNavLink>
 
                                 <!-- Team Switcher -->
@@ -354,7 +366,7 @@ const logout = () => {
                                     <div class="border-t border-gray-200 dark:border-gray-600" />
 
                                     <div class="block px-4 py-2 text-xs text-gray-400">
-                                        Switch Teams
+                                        Changer d'équipe
                                     </div>
 
                                     <template v-for="team in $page.props.auth.user.all_teams" :key="team.id">
@@ -388,5 +400,8 @@ const logout = () => {
                 <slot />
             </main>
         </div>
+
+        <!-- Footer -->
+        <AppFooter />
     </div>
 </template>

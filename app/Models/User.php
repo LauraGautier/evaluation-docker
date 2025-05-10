@@ -126,4 +126,50 @@ class User extends Authenticatable
     {
         return $this->hasMany(Objective::class, 'created_by');
     }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'recipient_id');
+    }
+
+    public function conversations()
+    {
+        return Conversation::where('user_one', $this->id)
+            ->orWhere('user_two', $this->id);
+    }
+
+    // Méthodes utiles pour la messagerie
+    public function getUnreadMessagesCount()
+    {
+        return $this->receivedMessages()
+            ->where('is_read', false)
+            ->count();
+    }
+
+    public function getConversationWith(User $user)
+    {
+        return Conversation::between($this->id, $user->id);
+    }
+
+    public function hasUnreadMessageFrom(User $user)
+    {
+        return $this->receivedMessages()
+            ->where('sender_id', $user->id)
+            ->where('is_read', false)
+            ->exists();
+    }
+
+    // Messages récents pour la boîte de réception
+    public function recentMessages()
+    {
+        return $this->receivedMessages()
+            ->with(['sender', 'conversation'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10);
+    }
 }

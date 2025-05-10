@@ -12,7 +12,8 @@ use App\Http\Controllers\{
     ObjectiveController,
     DashboardController,
     UserPresenceController,
-    AdminController
+    AdminController,
+    MessageController
 };
 use App\Http\Middleware\CheckRole;
 
@@ -28,6 +29,14 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+Route::get('/terms', function () {
+    return Inertia::render('TermsOfService');
+})->name('terms.show');
+
+Route::get('/privacy', function () {
+    return Inertia::render('PrivacyPolicy');
+})->name('policy.show');
 
 Route::get('/acces-refuse', function () {
     return Inertia::render('AccessDenied');
@@ -191,5 +200,19 @@ Route::middleware([
         Route::get('/collaborateur/tasks', [TaskController::class, 'collaborateurTasks'])->name('collaborateur.tasks');
 
         Route::get('/collaborateur/my-presence', [UserPresenceController::class, 'userPresence'])->name('collaborateur.my.presence');
+    });
+
+    Route::middleware(['auth', 'verified'])->group(function () {
+        // Messagerie
+        Route::prefix('messages')->name('messages.')->group(function () {
+            Route::get('/', [MessageController::class, 'index'])->name('index');
+            Route::get('/create/{user?}', [MessageController::class, 'create'])->name('create');
+            Route::post('/', [MessageController::class, 'store'])->name('store');
+            Route::get('/{conversation}', [MessageController::class, 'show'])->name('show');
+            Route::post('/{conversation}/reply', [MessageController::class, 'reply'])->name('reply');
+            Route::delete('/{message}', [MessageController::class, 'destroy'])->name('destroy');
+            Route::patch('/{message}/read', [MessageController::class, 'markAsRead'])->name('markAsRead');
+            Route::get('/api/unread-count', [MessageController::class, 'unreadCount'])->name('unreadCount');
+        });
     });
 });
