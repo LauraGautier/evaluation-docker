@@ -4,12 +4,12 @@
               :class="[
                   'flex items-center justify-center w-9 h-9 rounded-full transition ease-in-out duration-150',
                   unreadCount > 0
-                    ? 'bg-red-100 hover:bg-red-200'
-                    : 'bg-gray-100 hover:bg-gray-200'
+                    ? 'bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800'
+                    : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
               ]">
             <svg :class="[
                      'h-5 w-5',
-                     unreadCount > 0 ? 'text-red-600' : 'text-gray-600'
+                     unreadCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'
                  ]"
                  fill="none"
                  viewBox="0 0 24 24"
