@@ -13,7 +13,8 @@ use App\Http\Controllers\{
     DashboardController,
     UserPresenceController,
     AdminController,
-    MessageController
+    MessageController,
+    SlackController
 };
 use App\Http\Middleware\CheckRole;
 
@@ -29,7 +30,7 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
-
+ 
 Route::get('/terms', function () {
     return Inertia::render('TermsOfService');
 })->name('terms.show');
@@ -214,5 +215,25 @@ Route::middleware([
             Route::patch('/{message}/read', [MessageController::class, 'markAsRead'])->name('markAsRead');
             Route::get('/api/unread-count', [MessageController::class, 'unreadCount'])->name('unreadCount');
         });
+    });
+
+    // ----------------------
+    // 👤 Routes Slack
+    // ----------------------
+
+        Route::middleware([
+        Authenticate::class,
+        AuthenticateSession::class,
+        EnsureEmailIsVerified::class,
+    ])->prefix('slack')->name('slack.')->group(function () {
+
+        // Page principale Slack
+        Route::get('/', [SlackController::class, 'index'])->name('index');
+
+        // Envoi de messages
+        Route::post('/send-message', [SlackController::class, 'sendMessage'])->name('send.message');
+
+        // Partage de KPIs
+        Route::post('/share-kpis', [SlackController::class, 'shareKpis'])->name('share.kpis');
     });
 });
