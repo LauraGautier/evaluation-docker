@@ -23,6 +23,9 @@ services:
   # --- Service Application Laravel ---
   app:
     image: elelya/remoteflow-app:latest
+    build:
+       context: ..
+       dockerfile: Dockerfile
     container_name: remoteflow_app
     depends_on:
       database:
@@ -38,8 +41,7 @@ services:
       - APP_ENV=${APP_ENV}
       - APP_DEBUG=${APP_DEBUG}
       - APP_URL=${APP_URL}
-    volumes:
-      - ../:/var/www/html
+
     networks:
       - backend_net
     restart: unless-stopped
