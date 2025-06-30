@@ -13,6 +13,16 @@ trait PasswordValidationRules
      */
     protected function passwordRules(): array
     {
-        return ['required', 'string', Password::default(), 'confirmed'];
+        return [
+            'required',
+            'string',
+            Password::min(12) // NIST 2024-2025 recommande minimum 12
+                ->max(64)     // Support des phrases de passe longues
+                ->letters()   // Au moins une lettre
+                ->mixedCase() // Majuscules ET minuscules
+                ->numbers()   // Au moins un chiffre
+                ->symbols(),  // Au moins un caractère spécial
+            'confirmed'
+        ];
     }
 }

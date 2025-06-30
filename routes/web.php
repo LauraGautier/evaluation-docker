@@ -23,14 +23,27 @@ use App\Http\Middleware\CheckRole;
 // ------------------
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
+    // Si l'utilisateur est déjà connecté, on le redirige vers son dashboard
+    if (auth()->check()) {
+        $user = auth()->user();
+        switch ($user->role) {
+            case 'administrateur':
+                return redirect()->route('admin.dashboard');
+            case 'manager':
+                return redirect()->route('manager.dashboard');
+            case 'collaborateur':
+                return redirect()->route('collaborateur.dashboard');
+            default:
+                return redirect()->route('dashboard');
+        }
+    }
+
+        return Inertia::render('Auth/Login', [
+        'canResetPassword' => Route::has('password.request'),
+        'status' => session('status'),
     ]);
 });
- 
+
 Route::get('/terms', function () {
     return Inertia::render('TermsOfService');
 })->name('terms.show');
